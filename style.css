@@ -1,0 +1,63 @@
+body {
+  font-family: "Spectral", serif;
+}
+
+.filed {
+  width: 60%;
+  margin: auto;
+  position: relative;
+}
+.filed .cards {
+  text-transform: uppercase;
+}
+.filed .cards div {
+  position: absolute;
+  text-align: center;
+  border: 1px solid black;
+}
+.filed .cards .square {
+  height: 200px;
+  width: 200px;
+}
+.filed .cards .rectangle-v {
+  height: 200px;
+  width: 100px;
+}
+.filed .cards .rectangle-h {
+  height: 100px;
+  width: 200px;
+}
+.filed .dicePlaying {
+  position: absolute;
+  top: 336px;
+  left: 436px;
+}
+.filed .dicePlaying img {
+  display: none;
+}
+.filed .rollDice {
+  position: absolute;
+  background: #ffbd34;
+  top: 220px;
+  left: 220px;
+  width: 560px;
+  text-align: center;
+}
+.filed .firstPlayer {
+  position: absolute;
+  width: 50px;
+}
+
+.history {
+  background-color: yellow;
+}
+
+.biology {
+  background-color: green;
+}
+
+.geography {
+  background-color: turquoise;
+}
+
+/*# sourceMappingURL=style.css.map */

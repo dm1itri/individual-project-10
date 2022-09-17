@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Монополия</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:ital@1&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="filed">
+        <div class="cards">
+            <div id="cell0" class="square start">старт</div>
+            <div id="cell1" class="rectangle-v history" style="left:200px">и</div>
+            <div id="cell2" class="rectangle-v biology" style="left:300px">б</div>
+            <div id="cell3" class="rectangle-v biology" style="left:400px">б</div>
+            <div id="cell4" class="rectangle-v geography" style="left:500px">г</div>
+            <div id="cell5" class="rectangle-v history" style="left:600px">и</div>
+            <div id="cell6" class="rectangle-v geography" style="left:700px">г</div>
+
+            <div id="cell7" class="square skipMove" style="left:800px">парк</div>
+
+            <div id="cell8" class="rectangle-h geography" style="left:800px; top:200px">г</div>
+            <div id="cell9" class="rectangle-h lossPoint" style="left:800px; top:300px">-1</div>
+            <div id="cell10" class="rectangle-h biology" style="left:800px; top:400px">г</div>
+            <div id="cell11" class="rectangle-h history" style="left:800px; top:500px">и</div>
+
+            <div id="cell12" class="square teleportation" style="left:800px; top:600px">телепортация</div>
+
+            <div id="cell13" class="rectangle-v geography" style="left:700px; top:600px">г</div>
+            <div id="cell14" class="rectangle-v biology" style="left:600px; top:600px">Б</div>
+            <div id="cell15" class="rectangle-v history" style="left:500px; top:600px">и</div>
+            <div id="cell16" class="rectangle-v geography" style="left:400px; top:600px">Г</div>
+            <div id="cell17" class="rectangle-v biology" style="left:300px; top:600px">б</div>
+            <div id="cell18" class="rectangle-v history" style="left:200px; top:600px">и</div>
+
+            <div id="cell19" class="square busToPark" style="top:600px">автобус<br>в<br>парк</div>
+
+            <div id="cell20" class="rectangle-h geography" style="top:500px">г</div>
+            <div id="cell21" class="rectangle-h addingPoint" style="top:400px">+1</div>
+            <div id="cell22" class="rectangle-h biology" style="top:300px">б</div>
+            <div id="cell23" class="rectangle-h history" style="top:200px">и</div>
+        </div>
+        <div id="rollDice" class="rollDice">
+            <h3>ваш ход</h3>
+            <input type="button" onclick="dicePlaying()" value="бросить кубики">
+        </div>
+
+        <div class="dicePlaying">
+            <img id="dicePlaying1" src="image/dice_1.png" alt="1">
+            <img id="dicePlaying2" src="image/dice_2.png" alt="2">
+            <img id="dicePlaying3" src="image/dice_3.png" alt="3">
+            <img id="dicePlaying4" src="image/dice_4.png" alt="4">
+            <img id="dicePlaying5" src="image/dice_5.png" alt="5">
+            <img id="dicePlaying6" src="image/dice_6.png" alt="6">
+        </div>
+
+        <div class="chips">
+            <img id="firstPlayer" class="firstPlayer" src="image/car_64.png" alt="car">
+        </div>
+    </div>
+
+    <script src="dicePlaying.js"></script>
+</body>
+</html>
