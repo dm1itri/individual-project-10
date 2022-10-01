@@ -43,9 +43,20 @@ body {
   width: 560px;
   text-align: center;
 }
-.filed .firstPlayer {
-  position: absolute;
+.filed .chips img {
   width: 50px;
+  position: absolute;
+  display: block;
+}
+.filed .secondPlayer {
+  left: 150px;
+}
+.filed .thirdPlayer {
+  top: 150px;
+}
+.filed .fourthPlayer {
+  top: 150px;
+  left: 150px;
 }
 
 .history {
