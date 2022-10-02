@@ -43,6 +43,10 @@ body {
   width: 560px;
   text-align: center;
 }
+.filed .rollDice span {
+  text-transform: uppercase;
+  color: yellow;
+}
 .filed .chips img {
   width: 50px;
   position: absolute;

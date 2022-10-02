@@ -13,6 +13,7 @@ let thirdPlayerCoords = 0
 let fourthPlayerCoords = 0
 const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
+const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 let currentPlayer = 0
 let playersSkippingMove = []
 
@@ -147,14 +148,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
 
 function checkSquareCards(numberPlayer) {
     if (playersCoords[numberPlayer] === 12) {
-        countSteps = randomIntFromInterval(7, 7)
+        countSteps = randomIntFromInterval(1, 23)
         setTimeout(rollDice, 1000, numberPlayer, playersCoords[numberPlayer], countSteps)
         playersCoords[numberPlayer] = (countSteps + playersCoords[numberPlayer]) % 24
     }
     if (playersCoords[numberPlayer] === 19) {
         setTimeout(rollDice, 2000, numberPlayer, playersCoords[numberPlayer], 12)
         // 2000 таймаут поставлен, т.к. если попадет сюда с телепорта, то не будет видно перемещение сюда, а сразу в парк
-        playersCoords[numberPlayer] == 7
+        playersCoords[numberPlayer] = 7
     }
     if (playersCoords[numberPlayer] === 7) {
         playersSkippingMove.push(numberPlayer)
@@ -181,5 +182,7 @@ function move(numberPlayer, number_steps) {
             playersSkippingMove.shift()
         }
     }
-    document.getElementById("numberPlayer").innerText = "Ходит " + " " + rusNamePlayers[currentPlayer]
+    document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
+    document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
+    console.log(playersCoords)
 }
