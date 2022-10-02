@@ -6,14 +6,15 @@ const diceId = [
     'dicePlaying5',
     'dicePlaying6'
 ];
-
+const countPlayers = 4
 let firstPlayerCoords = 0
 let secondPlayerCoords = 0
 let thirdPlayerCoords = 0
 let fourthPlayerCoords = 0
 const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
+const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 let currentPlayer = 0
-
+let playersSkippingMove = []
 
 function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
@@ -36,7 +37,6 @@ function dicePlaying() {
 
     setTimeout(function () {
         clearInterval(interval)
-        //alert(currentIndex+1)
         }, 2000)
 
     setTimeout(function () {
@@ -44,14 +44,16 @@ function dicePlaying() {
             document.getElementById(diceId[i]).style.display = 'none'
             document.getElementById('rollDice').style.display = 'block'
         }
-        rollDice(currentPlayer, playersCoords[currentPlayer], currentIndex + 1)
-    }, 3000)
+        move(currentPlayer, currentIndex + 1)
+        // rollDice(currentPlayer, playersCoords[currentPlayer], currentIndex + 1)
+    }, 3000) // 3000
 }
 
 function rollDice (numberPlayer, index_0, number_steps) {
     const square_cards = [0, 7, 12, 19]
     const playerId = ['firstPlayer', 'secondPlayer', 'thirdPlayer', 'fourthPlayer']
     let coords
+    let realCoords = index_0
     //const pos_x0 = [200, 100, 200]
     //const pos_y0 = [200, 100, 200]
     //const pos_x1 = [100, 100, 200]
@@ -64,26 +66,9 @@ function rollDice (numberPlayer, index_0, number_steps) {
     } else if (index_0 >= 7) {
         index_0 -=7
     }
-/*    for (let i = 1; i <= number_steps; i++) {
-        if (0 <= firstPlayerCoords && firstPlayerCoords < 7) {
-            document.getElementById(playerId[numberPlayer]).style.left = index_0  * 100 + 200 + 'px'
-        } else if (7 <= firstPlayerCoords && firstPlayerCoords < 12) {
-            document.getElementById(playerId[numberPlayer]).style.top = index_0 * 100 + 200 + 'px'
-        } else if (12 <= firstPlayerCoords && firstPlayerCoords < 19) {
-            if (firstPlayerCoords !== 18){
-                document.getElementById(playerId[numberPlayer]).style.left = 800 - (index_0 * 100 + 100) + 'px'
-            } else {
-                document.getElementById(playerId[numberPlayer]).style.left = 800 - (index_0 * 100 + 200) + 'px'
-            }
-        } else {
-            if (firstPlayerCoords !== 23){
-                document.getElementById(playerId[numberPlayer]).style.top = 600 - (index_0 * 100 + 100) + 'px'
-            } else {
-                document.getElementById(playerId[numberPlayer]).style.top = 600 - (index_0 * 100 + 200) + 'px'
-            }
-        }*/
+
     for (let i = 1; i <= number_steps; i++) {
-        coords = playersCoords[numberPlayer]
+        coords = realCoords
         if (numberPlayer === 0) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
                 if (0 <= coords && coords< 7) {
@@ -135,7 +120,7 @@ function rollDice (numberPlayer, index_0, number_steps) {
         } else if (numberPlayer === 3) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
                 if (0 <= coords && coords < 7) {
-                    move =  coords !== 6 ? index_0  * 100 + 250 : index_0  * 100 + 350
+                    move = coords !== 6 ? index_0  * 100 + 250 : index_0  * 100 + 350
                 } else {
                     move =  750 - index_0 * 100
                 }
@@ -151,20 +136,50 @@ function rollDice (numberPlayer, index_0, number_steps) {
         }
 
         index_0 ++
-        playersCoords[numberPlayer] ++
-        if (playersCoords[numberPlayer] === 24) {
-            playersCoords[numberPlayer] = 0
-        }
-        if (square_cards.indexOf(playersCoords[numberPlayer]) !== -1) {
+        realCoords = realCoords === 23 ? 0 : realCoords + 1
+        if (square_cards.indexOf(realCoords) !== -1) {
             index_0 = 0
         }
     }
-    currentPlayer = (currentPlayer + 1) % 4
+    return realCoords
+}
 
 
-
+function checkSquareCards(numberPlayer) {
+    if (playersCoords[numberPlayer] === 12) {
+        countSteps = randomIntFromInterval(7, 7)
+        setTimeout(rollDice, 1000, numberPlayer, playersCoords[numberPlayer], countSteps)
+        playersCoords[numberPlayer] = (countSteps + playersCoords[numberPlayer]) % 24
     }
-    //alert(firstPlayerCoords)
+    if (playersCoords[numberPlayer] === 19) {
+        setTimeout(rollDice, 2000, numberPlayer, playersCoords[numberPlayer], 12)
+        // 2000 таймаут поставлен, т.к. если попадет сюда с телепорта, то не будет видно перемещение сюда, а сразу в парк
+        playersCoords[numberPlayer] == 7
+    }
+    if (playersCoords[numberPlayer] === 7) {
+        playersSkippingMove.push(numberPlayer)
+    }
+}
 
+/*
+основная функия, отвечающая за вызов:
+функции перемещения фигурок,
+функции проверки попадания на особенные карточки,
+проверки списка спящих,
+информаирования кто ходит
+ */
+function move(numberPlayer, number_steps) {
 
-//rollDice(firstPlayerCoords, 16)
+    playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], number_steps)
+    checkSquareCards(numberPlayer)
+
+    for (let i = 0; i < countPlayers; i++) {
+        currentPlayer = (currentPlayer + 1) % 4
+        if (playersSkippingMove[0] !== currentPlayer) {
+            break
+        } else {
+            playersSkippingMove.shift()
+        }
+    }
+    document.getElementById("numberPlayer").innerText = "Ходит " + " " + rusNamePlayers[currentPlayer]
+}
