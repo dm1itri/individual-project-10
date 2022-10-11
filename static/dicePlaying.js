@@ -14,12 +14,32 @@ let fourthPlayerCoords = 0
 const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
-let currentPlayer = 0
+let currentPlayer
 let playersSkippingMove = []
+
 
 function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
+
+
+function loadCurrentPlayer(url) {
+    var xhr = new XMLHttpRequest()
+    let currPlayer
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+        currPlayer = JSON.parse(xhr.response)
+        }
+    }
+
+    xhr.open('GET', url, false)
+    xhr.send()
+    return currPlayer['currentPlayer']
+}
+
+
+currentPlayer = loadCurrentPlayer('http://127.0.0.1:5000/currentPlayer')
+console.log(currentPlayer)
 
 function dicePlaying() {
     document.getElementById('rollDice').style.display = 'none'
@@ -182,6 +202,8 @@ function move(numberPlayer, number_steps) {
             playersSkippingMove.shift()
         }
     }
+
+
     document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
     document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
     console.log(playersCoords)
