@@ -11,11 +11,15 @@ let firstPlayerCoords
 let secondPlayerCoords
 let thirdPlayerCoords
 let fourthPlayerCoords
-const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 let currentPlayer
 const gameID = 1
+getCurrentPlayers(`http://127.0.0.1:5000/api/players/${gameID}`)
+const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
+document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
+document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
+
 
 function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
@@ -23,11 +27,16 @@ function randomIntFromInterval(min, max) { // min and max included
 
 
 function getCurrentPlayer(url) {
-    var xhr = new XMLHttpRequest()
+    let xhr = new XMLHttpRequest();
     let currPlayer
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-        currPlayer = JSON.parse(xhr.response)
+        if (xhr.readyState === 4) {
+            if  (xhr.status === 200) {
+                currPlayer = JSON.parse(xhr.response)
+            }
+            else {
+                console.log(xhr.status)
+            }
         }
     }
 
@@ -39,16 +48,24 @@ function getCurrentPlayer(url) {
 
 function putCurrentPLayer(url, skipMove) {
     let data = new FormData()
-    data.append('current_player',  currentPlayer + 1)
+    data.append('current_player',  currentPlayer)
     data.append('current_position', playersCoords[currentPlayer])
     data.append('skipping_move', skipMove)
-    var xhr = new XMLHttpRequest()
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if  (xhr.status !== 200) {
+                console.log(xhr.status)
+            }
+        }
+    }
     xhr.open('PUT', url, false)
     xhr.send(data)
 }
 
 function getCurrentPlayers(url) {
-    var xhr = new XMLHttpRequest()
+
+    let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
         games_args = JSON.parse(xhr.response)
@@ -68,8 +85,6 @@ function getCurrentPlayers(url) {
     if (fourthPlayerCoords !== 0) {rollDice(3, 0, fourthPlayerCoords)}
 
 }
-
-getCurrentPlayers(`http://127.0.0.1:5000/api/players/${gameID}`)
 
 
 function dicePlaying() {
@@ -223,13 +238,13 @@ function checkSquareCards(numberPlayer) {
 информаирования кто ходит
  */
 function move(numberPlayer, number_steps) {
-
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], number_steps)
-    putCurrentPLayer(`http://127.0.0.1:5000/api/game/${gameID}`, checkSquareCards(numberPlayer))
+    let skipping_move = checkSquareCards(numberPlayer)
+    putCurrentPLayer(`http://127.0.0.1:5000/api/game/${gameID}`, skipping_move)
 
     currentPlayer = getCurrentPlayer(`http://127.0.0.1:5000/api/game/${gameID}`)
 
     document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
     document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
-    console.log(playersCoords)
+
 }
