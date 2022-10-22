@@ -26,29 +26,14 @@ class ApiPlayers(Resource):
         with db_session.create_session() as session:
             game = session.query(Game).get(game_id)
             players = session.query(Player).filter(Player.game_id == game.id).order_by(Player.number_move).all()
-            first_player = players[0]
-            second_player = players[1]
-            third_player = players[2]
-            fourth_player = players[3]
-        return jsonify({
+        response = {
             'current_player': game.current_player,
-            'first_player': {
-                'current_position': first_player.current_position,
-                'skipping_move': first_player.skipping_move
-            },
-            'second_player': {
-                'current_position': second_player.current_position,
-                'skipping_move': second_player.skipping_move
-            },
-            'third_player': {
-                'current_position': third_player.current_position,
-                'skipping_move': third_player.skipping_move
-            },
-            'fourth_player': {
-                'current_position': fourth_player.current_position,
-                'skipping_move': fourth_player.skipping_move
-            }
-        })
+            'count_players': len(players)
+        }
+        for i in range(len(players)):
+            response[f'{i}_player'] = {'current_position': players[i].current_position,
+                                       'skipping_move': players[i].skipping_move}
+        return jsonify(response)
 
 
 class ApiGame(Resource):
@@ -60,20 +45,24 @@ class ApiGame(Resource):
     def put(self, game_id):
         print('\nput')
         with db_session.create_session() as session:
-            player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == int(request.form['current_player'])).first()
+            players = session.query(Player).filter(Player.game_id == game_id).all()
+            count_players = len(players)
+            for i in players:
+                if i.number_move == int(request.form['current_player']):
+                    player = i
             player.current_position = int(request.form['current_position'])
             player.skipping_move = int(request.form['skipping_move'])
             session.commit()
 
-            game = session.query(Game).get(game_id)
-            curr_player = (int(request.form['current_player']) + 1) % 4
+            curr_player = (int(request.form['current_player']) + 1) % count_players
             for i in range(4):
                 player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == curr_player).first()
                 if player.skipping_move:
                     player.skipping_move = False
-                    curr_player = (curr_player + 1) % 4
+                    curr_player = (curr_player + 1) % count_players
                 else:
                     break
+            game = session.query(Game).get(game_id)
             game.current_player = curr_player
             session.commit()
         return jsonify({game_id: 'success'})

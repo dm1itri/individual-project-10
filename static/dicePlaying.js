@@ -6,25 +6,29 @@ const diceId = [
     'dicePlaying5',
     'dicePlaying6'
 ];
-const countPlayers = 4
-let firstPlayerCoords
-let secondPlayerCoords
-let thirdPlayerCoords
-let fourthPlayerCoords
+let countPlayers
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 let currentPlayer
 const gameID = 1
+let playersCoords = []
+let thisPlayer = getCookie('player_id')
+
+
 getCurrentPlayers(`http://127.0.0.1:5000/api/players/${gameID}`)
-const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
+
+//const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
 document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
 document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
-
 
 function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+// ЭТУ функцию лучше переписать или разобраться в ней
+function getCookie(name) {
+    return document.cookie.slice(document.cookie.indexOf('=') + 1)
+}
 
 function getCurrentPlayer(url) {
     let xhr = new XMLHttpRequest();
@@ -64,8 +68,9 @@ function putCurrentPLayer(url, skipMove) {
 }
 
 function getCurrentPlayers(url) {
-
+    let games_args
     let xhr = new XMLHttpRequest();
+
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
         games_args = JSON.parse(xhr.response)
@@ -75,15 +80,12 @@ function getCurrentPlayers(url) {
     xhr.open('GET', url, false)
     xhr.send()
     currentPlayer = games_args['current_player']
-    firstPlayerCoords = games_args['first_player']['current_position']
-    secondPlayerCoords = games_args['second_player']['current_position']
-    thirdPlayerCoords = games_args['third_player']['current_position']
-    fourthPlayerCoords = games_args['fourth_player']['current_position']
-    if (firstPlayerCoords !== 0) {rollDice(0, 0, firstPlayerCoords)}
-    if (secondPlayerCoords !== 0) {rollDice(1, 0, secondPlayerCoords)}
-    if (thirdPlayerCoords !== 0) {rollDice(2, 0, thirdPlayerCoords)}
-    if (fourthPlayerCoords !== 0) {rollDice(3, 0, fourthPlayerCoords)}
-
+    countPlayers = games_args['count_players']
+    for (let i=0; i < countPlayers; i++){
+        playersCoords.push(games_args[`${i}_player`]['current_position'])
+        document.getElementById(`${i}_Player`).style.display = 'block'
+        if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords)}
+    }
 }
 
 
@@ -118,7 +120,6 @@ function dicePlaying() {
 
 function rollDice (numberPlayer, index_0, number_steps) {
     const square_cards = [0, 7, 12, 19]
-    const playerId = ['firstPlayer', 'secondPlayer', 'thirdPlayer', 'fourthPlayer']
     let coords
     let realCoords = index_0
     //const pos_x0 = [200, 100, 200]
@@ -143,14 +144,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.left = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = index_0 * 100 + 200
                 } else {
                     move = coords !== 23 ? 500 - index_0 * 100 : move = 500 - index_0 * 100 - 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.top = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 1) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -159,14 +160,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move =  750 - index_0 * 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.left = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = index_0 * 100 + 200
                 } else {
                     move = coords !== 23 ? 500 - index_0 * 100: move = 500 - index_0 * 100 - 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.top = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 2) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -175,14 +176,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.left = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
                 } else {
                     move =  550 - index_0 * 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.top = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 3) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -191,14 +192,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move =  750 - index_0 * 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.left = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
                 } else {
                     move =  550 - index_0 * 100
                 }
-                document.getElementById(playerId[numberPlayer]).style.top = move + 'px'
+                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
             }
         }
 
@@ -214,7 +215,7 @@ function rollDice (numberPlayer, index_0, number_steps) {
 
 function checkSquareCards(numberPlayer) {
     if (playersCoords[numberPlayer] === 12) {
-        countSteps = randomIntFromInterval(1, 23)
+        let countSteps = randomIntFromInterval(1, 23)
         setTimeout(rollDice, 1000, numberPlayer, playersCoords[numberPlayer], countSteps)
         playersCoords[numberPlayer] = (countSteps + playersCoords[numberPlayer]) % 24
     }
@@ -241,10 +242,20 @@ function move(numberPlayer, number_steps) {
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], number_steps)
     let skipping_move = checkSquareCards(numberPlayer)
     putCurrentPLayer(`http://127.0.0.1:5000/api/game/${gameID}`, skipping_move)
-
     currentPlayer = getCurrentPlayer(`http://127.0.0.1:5000/api/game/${gameID}`)
 
     document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
     document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
 
+}
+
+
+
+
+function intervalGetCurrentPlayer(url) {
+    let interval = setInterval( function () {
+        let currPlayer = getCurrentPlayer(`http://127.0.0.1:5000/api/game/${gameID}`)
+
+        }
+    )
 }

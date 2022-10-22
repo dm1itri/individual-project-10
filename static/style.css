@@ -50,17 +50,22 @@ body {
 .filed .chips img {
   width: 50px;
   position: absolute;
-  display: block;
+}
+.filed .firstPlayer {
+  display: none;
 }
 .filed .secondPlayer {
   left: 150px;
+  display: none;
 }
 .filed .thirdPlayer {
   top: 150px;
+  display: none;
 }
 .filed .fourthPlayer {
   top: 150px;
   left: 150px;
+  display: none;
 }
 
 .history {

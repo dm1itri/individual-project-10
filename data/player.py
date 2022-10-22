@@ -10,6 +10,7 @@ class Player(SqlAlchemyBase, SerializerMixin):
     current_position = Column(Integer, default=0)
     skipping_move = Column(Boolean, default=False)
     number_move = Column(Integer)
+    is_occupied = Column(Boolean, default=False)
     game_id = Column(Integer, ForeignKey(Game.id))
 
 
