@@ -8,6 +8,7 @@ class Game(SqlAlchemyBase, SerializerMixin):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     current_player = Column(Integer, nullable=False, default=0)
+    # number_history = Column(Integer)  # текущий ход за всю игру
 
     def __repr__(self):
-        return f'<Game> {self.id} {self.current_player}'
+        return f'<Game> {self.id} current player: {self.current_player} number history: {self.number_history}'

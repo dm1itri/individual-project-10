@@ -1,3 +1,5 @@
+// import {getCookie, getCurrentPlayer, putCurrentPLayer, putHistoryMove, getHistoryMove} from "./withServer";
+
 const diceId = [
     'dicePlaying1',
     'dicePlaying2',
@@ -13,25 +15,17 @@ let currentPlayer
 const gameID = 1
 let playersCoords = []
 let thisPlayer = getCookie('player_id')
+let numberHistory
 
+getCurrentPlayers(gameID)
+updateDocument(currentPlayer)
 
-getCurrentPlayers(`http://127.0.0.1:5000/api/players/${gameID}`)
-
-//const playersCoords = [firstPlayerCoords, secondPlayerCoords, thirdPlayerCoords, fourthPlayerCoords]
-document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
-document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
-
-function randomIntFromInterval(min, max) { // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-// ЭТУ функцию лучше переписать или разобраться в ней
 function getCookie(name) {
-    return document.cookie.slice(document.cookie.indexOf('=') + 1)
+    return Number(document.cookie.slice(document.cookie.indexOf('=') + 1))
 }
 
-function getCurrentPlayer(url) {
-    let xhr = new XMLHttpRequest();
+function getCurrentPlayer(gameID) {
+    let xhr = new XMLHttpRequest()
     let currPlayer
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -43,17 +37,15 @@ function getCurrentPlayer(url) {
             }
         }
     }
-
-    xhr.open('GET', url, false)
+    xhr.open('GET', `http://127.0.0.1:5000/api/game/${gameID}`, false)
     xhr.send()
-    return currPlayer[`${gameID}`]['current_player']
+    return currPlayer[gameID]['current_player']
 }
 
-
-function putCurrentPLayer(url, skipMove) {
+function putCurrentPLayer(gameID, skipMove, currentPlayer, playerCoords) {
     let data = new FormData()
     data.append('current_player',  currentPlayer)
-    data.append('current_position', playersCoords[currentPlayer])
+    data.append('current_position', playerCoords)
     data.append('skipping_move', skipMove)
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -63,11 +55,48 @@ function putCurrentPLayer(url, skipMove) {
             }
         }
     }
-    xhr.open('PUT', url, false)
+    xhr.open('PUT', `http://127.0.0.1:5000/api/game/${gameID}`, false)
     xhr.send(data)
 }
+function putHistoryMove(gameID, currentPlayer, numberSteps) {
+    let data = new FormData()
+    data.append('number_move',  currentPlayer)
+    data.append('number_steps', numberSteps)
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if  (xhr.status !== 200) {
+                console.log(xhr.status)
+            }
+        }
+    }
+    xhr.open('PUT', `http://127.0.0.1:5000/api/history/${gameID}`, false)
+    xhr.send(data)
+}
+function getHistoryMove(gameID) {
+    let xhr = new XMLHttpRequest()
+    let history
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if  (xhr.status === 200) {
+                history = JSON.parse(xhr.response)
+            }
+            else {
+                console.log(xhr.status)
+            }
+        }
+    }
+    xhr.open('GET', `http://127.0.0.1:5000/api/history/${gameID}`, false)
+    xhr.send()
+    return history[gameID]
+}
 
-function getCurrentPlayers(url) {
+
+function randomIntFromInterval(min, max) { // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function getCurrentPlayers(gameID) {
     let games_args
     let xhr = new XMLHttpRequest();
 
@@ -77,11 +106,12 @@ function getCurrentPlayers(url) {
         }
     }
 
-    xhr.open('GET', url, false)
+    xhr.open('GET', `http://127.0.0.1:5000/api/players/${gameID}`, false)
     xhr.send()
     currentPlayer = games_args['current_player']
     countPlayers = games_args['count_players']
-    for (let i=0; i < countPlayers; i++){
+    numberHistory = games_args['number_history']
+    for (let i = 0; i < countPlayers; i++){
         playersCoords.push(games_args[`${i}_player`]['current_position'])
         document.getElementById(`${i}_Player`).style.display = 'block'
         if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords)}
@@ -90,7 +120,7 @@ function getCurrentPlayers(url) {
 
 
 function dicePlaying() {
-    document.getElementById('rollDice').style.display = 'none'
+    document.getElementById('buttonDicePlaying').style.visibility = 'hidden'
     let delay = 100
     let currentIndex = randomIntFromInterval(0, 5)
     let pastIndex
@@ -111,7 +141,7 @@ function dicePlaying() {
     setTimeout(function () {
         for (let i = 0; i < 6; i++) {
             document.getElementById(diceId[i]).style.display = 'none'
-            document.getElementById('rollDice').style.display = 'block'
+            document.getElementById('buttonDicePlaying').style.visibility = 'visible'
         }
         move(currentPlayer, currentIndex + 1)
         // rollDice(currentPlayer, playersCoords[currentPlayer], currentIndex + 1)
@@ -144,14 +174,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = index_0 * 100 + 200
                 } else {
                     move = coords !== 23 ? 500 - index_0 * 100 : move = 500 - index_0 * 100 - 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 1) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -160,14 +190,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move =  750 - index_0 * 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = index_0 * 100 + 200
                 } else {
                     move = coords !== 23 ? 500 - index_0 * 100: move = 500 - index_0 * 100 - 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 2) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -176,14 +206,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
                 } else {
                     move =  550 - index_0 * 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
             }
         } else if (numberPlayer === 3) {
             if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
@@ -192,14 +222,14 @@ function rollDice (numberPlayer, index_0, number_steps) {
                 } else {
                     move =  750 - index_0 * 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.left = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
             } else {
                 if (7 <= coords && coords < 12) {
                     move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
                 } else {
                     move =  550 - index_0 * 100
                 }
-                document.getElementById(`${currentPlayer}_Player`).style.top = move + 'px'
+                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
             }
         }
 
@@ -217,6 +247,28 @@ function checkSquareCards(numberPlayer) {
     if (playersCoords[numberPlayer] === 12) {
         let countSteps = randomIntFromInterval(1, 23)
         setTimeout(rollDice, 1000, numberPlayer, playersCoords[numberPlayer], countSteps)
+        putHistoryMove(gameID, currentPlayer, countSteps)
+        playersCoords[numberPlayer] = (countSteps + playersCoords[numberPlayer]) % 24
+        numberHistory += 1
+    }
+    if (playersCoords[numberPlayer] === 19) {
+        setTimeout(rollDice, 2000, numberPlayer, playersCoords[numberPlayer], 12)
+        // 2000 таймаут поставлен, т.к. если попадет сюда с телепорта, то не будет видно перемещение сюда, а сразу в парк
+        putHistoryMove(gameID, currentPlayer, 12)
+        playersCoords[numberPlayer] = 7
+        numberHistory += 1
+    }
+    if (playersCoords[numberPlayer] === 7) {
+        return 1
+    }
+    return 0
+}
+
+
+function checkSquareCardsWithoutUp(numberPlayer) {
+    if (playersCoords[numberPlayer] === 12) {
+        let countSteps = randomIntFromInterval(1, 23)
+        setTimeout(rollDice, 1000, numberPlayer, playersCoords[numberPlayer], countSteps)
         playersCoords[numberPlayer] = (countSteps + playersCoords[numberPlayer]) % 24
     }
     if (playersCoords[numberPlayer] === 19) {
@@ -224,38 +276,57 @@ function checkSquareCards(numberPlayer) {
         // 2000 таймаут поставлен, т.к. если попадет сюда с телепорта, то не будет видно перемещение сюда, а сразу в парк
         playersCoords[numberPlayer] = 7
     }
-    if (playersCoords[numberPlayer] === 7) {
-        return 1
-    }
-    return 0
-
 }
 
-/*
-основная функия, отвечающая за вызов:
-функции перемещения фигурок,
-функции проверки попадания на особенные карточки,
-проверки списка спящих,
-информаирования кто ходит
- */
-function move(numberPlayer, number_steps) {
-    playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], number_steps)
-    let skipping_move = checkSquareCards(numberPlayer)
-    putCurrentPLayer(`http://127.0.0.1:5000/api/game/${gameID}`, skipping_move)
-    currentPlayer = getCurrentPlayer(`http://127.0.0.1:5000/api/game/${gameID}`)
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+function updateDocument(currentPlayer) {
     document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
     document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
-
+    document.getElementById("buttonDicePlaying").style.visibility = currentPlayer === thisPlayer ? 'visible' : 'hidden'
 }
 
 
+async function move(numberPlayer, numberSteps) {
+    putHistoryMove(gameID, currentPlayer, numberSteps)
+    playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], numberSteps)
+    let skipping_move = checkSquareCards(numberPlayer)
+    putCurrentPLayer(gameID, skipping_move, currentPlayer, playersCoords[currentPlayer])
+    numberHistory += 1
+    // pastPlayer = currentPlayer
+    // await updatePlayer()
+    currentPlayer = getCurrentPlayer(gameID)
+    updateDocument(currentPlayer)
+    await waiting_move()
+}
 
 
-function intervalGetCurrentPlayer(url) {
-    let interval = setInterval( function () {
-        let currPlayer = getCurrentPlayer(`http://127.0.0.1:5000/api/game/${gameID}`)
-
+async function waiting_move() {
+    let numberMove
+    let lastHistory
+    let t = true
+    while (t) {
+        currentPlayer = getCurrentPlayer(gameID)
+        lastHistory = getHistoryMove(gameID)
+        updateDocument(currentPlayer)
+        if (currentPlayer === thisPlayer && lastHistory['number_history'] === numberHistory) {
+            t = false
+        } else if (lastHistory['number_history'] === numberHistory) {
+            await sleep(2000)
         }
-    )
+        else {
+            numberMove = lastHistory['number_move']
+            playersCoords[numberMove] = rollDice(numberMove, playersCoords[numberMove], lastHistory['number_steps'])
+            checkSquareCardsWithoutUp(numberMove)
+            numberHistory += 1
+            await sleep (4000)
+        }
+    }
 }
+
+
+waiting_move()

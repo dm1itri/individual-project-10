@@ -5,6 +5,8 @@ id_game = 1
 id_player = 1
 
 
+print(get(f'http://127.0.0.1:5000/api/history/{id_game}').json())
+
 #print(get(f'http://127.0.0.1:5000/api/players/{id_game}').json())  # получение всех пользователей
 
 #print(get(f'http://127.0.0.1:5000/api/game/{id_game}').json())  # получение игрока, чей сейчас ход

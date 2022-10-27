@@ -13,6 +13,5 @@ class Player(SqlAlchemyBase, SerializerMixin):
     is_occupied = Column(Boolean, default=False)
     game_id = Column(Integer, ForeignKey(Game.id))
 
-
     def __repr__(self):
-        return f'<Player> {self.id} Position: {self.current_position} Пропуск хода: {self.skipping_move}'
+        return f'<Player> {self.id} Game: {self.game_id} Position: {self.current_position} Skipping move: {self.skipping_move} Number move: {self.number_move} Is occupied: {self.is_occupied}'
