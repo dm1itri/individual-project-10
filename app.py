@@ -12,7 +12,7 @@ api = Api(app)
 api.add_resource(ApiGame, '/api/game/<int:game_id>')
 # api.add_resource(ApiPlayer, '/api/player/<int:player_id>')
 api.add_resource(ApiPlayers, '/api/players/<int:game_id>')
-api.add_resource(ApiHistoryMove, '/api/history/<int:game_id>')  # /<int:number_history>
+api.add_resource(ApiHistoryMove, '/api/history_game')  # /<int:number_history>
 
 
 @app.get('/')

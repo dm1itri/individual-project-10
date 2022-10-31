@@ -62,16 +62,21 @@ class ApiGame(Resource):
 
 
 class ApiHistoryMove(Resource):
-    def get(self, game_id, number_history=None):
+    def get(self):
+        game_id = int(request.args.get('game_id'))
+        number_history = request.args.get('number_history', None)
+
         with db_session.create_session() as session:
             if number_history:
-                move = session.query(HistoryMove).filter(game_id == HistoryMove.game_id, HistoryMove.number_history == number_history).first()
+                move = session.query(HistoryMove).filter(game_id == HistoryMove.game_id, HistoryMove.number_history == int(number_history)).first()
             else:
                 move = session.query(HistoryMove).filter(game_id == HistoryMove.game_id).order_by(HistoryMove.number_history.desc()).first()
-        print(move)
+        if not move:
+            return jsonify({game_id: None})
         return jsonify({game_id: move.to_dict(only=('number_history', 'number_move', 'number_steps'))})
 
-    def put(self, game_id):
+    def put(self):
+        game_id = int(request.args.get('game_id'))
         with db_session.create_session() as session:
             history = HistoryMove()
             history.game_id = game_id
