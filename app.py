@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, redirect, url_for
 from flask_restful import Api
 from data import db_session
 from data.player import Player
-from update_db import clear_game_players
+from update_db import clear_game_players, add_game,  add_players, add_null_history_move
 from api.routes import ApiGame, ApiPlayers, ApiHistoryMove
 
 
@@ -15,27 +15,39 @@ api.add_resource(ApiPlayers, '/api/players/<int:game_id>')
 api.add_resource(ApiHistoryMove, '/api/history_game')  # /<int:number_history>
 
 
-@app.get('/')
-def index():
+@app.get('/game/<int:game_id>')
+def game(game_id):
+    print(request.cookies.get('player_id'))
     if not request.cookies.get('player_id'):
         # redirect(url_for('cookie_player_id'))
-        print(request.cookies.get('player_id'))
         res = make_response("Обновите страницу для начала игры")
         with db_session.create_session() as session:
-            player = session.query(Player).filter(Player.is_occupied == False, Player.game_id == 1).order_by(Player.number_move).first()
+            player = session.query(Player).filter(Player.is_occupied == False, Player.game_id == game_id).order_by(Player.number_move).first()
             if not player:
                 return 'К сожалению, игровая комната заполнена'
             player.is_occupied = True
             session.commit()
-            res.set_cookie('player_id', str(player.number_move), max_age=60)  # , max_age= 60 * 60
+            res.set_cookie('player_id', str(player.number_move), max_age=60 * 60)  # , max_age= 60 * 60
         return res
     else:
         # print(request.cookies.get('player_id'))
         return render_template('index.html')
 
 
-with db_session.create_session() as session:
-    clear_game_players(session, 1)
+@app.route('/create_game', methods=['GET', 'POST'])
+def create_game():
+    if request.method == 'GET':
+        return render_template('create_game.html')
+    with db_session.create_session() as session:
+        game_id = add_game(session)
+        add_players(session, game_id, int(request.form.get('count_players')))
+        add_null_history_move(session, game_id)
+    return redirect(url_for('game', game_id=game_id))
+
+
+
+#with db_session.create_session() as session:
+    #clear_game_players(session, 1)
 
 
 if __name__ == '__main__':

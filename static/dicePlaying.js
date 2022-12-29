@@ -8,11 +8,11 @@ const diceId = [
     'dicePlaying5',
     'dicePlaying6'
 ];
-let countPlayers
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 let currentPlayer
-const gameID = 1
+console.log(parseInt(document.location.pathname.substring(6)))
+const gameID = parseInt(document.location.pathname.substring(6))
 let playersCoords = []
 let thisPlayer = getCookie('player_id')
 let numberHistory
@@ -109,9 +109,8 @@ function getCurrentPlayers(gameID) {
     xhr.open('GET', `http://127.0.0.1:5000/api/players/${gameID}`, false)
     xhr.send()
     currentPlayer = games_args['current_player']
-    countPlayers = games_args['count_players']
     numberHistory = games_args['number_history']
-    for (let i = 0; i < countPlayers; i++){
+    for (let i = 0; i < games_args['count_players']; i++){
         playersCoords.push(games_args[`${i}_player`]['current_position'])
         document.getElementById(`${i}_Player`).style.display = 'block'
         if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords)}
@@ -147,12 +146,7 @@ async function dicePlaying() {
 
 function rollDice (numberPlayer, index_0, number_steps) {
     const square_cards = [0, 7, 12, 19]
-    let coords
     let realCoords = index_0
-    //const pos_x0 = [200, 100, 200]
-    //const pos_y0 = [200, 100, 200]
-    //const pos_x1 = [100, 100, 200]
-    //const pos_y1 = [200, 100, 200]
     let move
     if (index_0 >= 19) {
         index_0 -= 19
@@ -163,78 +157,38 @@ function rollDice (numberPlayer, index_0, number_steps) {
     }
 
     for (let i = 1; i <= number_steps; i++) {
-        coords = realCoords
-        if (numberPlayer === 0) {
-            if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
-                if (0 <= coords && coords< 7) {
-                    move =  index_0  * 100 + 200
-                } else {
-                    move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+        if (0 <= realCoords && realCoords < 7) {
+            if (numberPlayer % 2) {
+                move =  realCoords !== 6 ? index_0  * 100 + 250 : index_0  * 100 + 350
             } else {
-                if (7 <= coords && coords < 12) {
-                    move = index_0 * 100 + 200
-                } else {
-                    move = coords !== 23 ? 500 - index_0 * 100 : move = 500 - index_0 * 100 - 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
+                move =  index_0  * 100 + 200
             }
-        } else if (numberPlayer === 1) {
-            if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
-                if (0 <= coords && coords < 7) {
-                    move =  coords !== 6 ? index_0  * 100 + 250 : index_0  * 100 + 350
-                } else {
-                    move =  750 - index_0 * 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+            document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+        } else if (7 <= realCoords && realCoords < 12) {
+            if (numberPlayer < 2) {
+                move = index_0 * 100 + 200
             } else {
-                if (7 <= coords && coords < 12) {
-                    move = index_0 * 100 + 200
-                } else {
-                    move = coords !== 23 ? 500 - index_0 * 100: move = 500 - index_0 * 100 - 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
+                move = realCoords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
             }
-        } else if (numberPlayer === 2) {
-            if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
-                if (0 <= coords && coords < 7) {
-                    move =  index_0  * 100 + 200
-                } else {
-                    move = coords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+            document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
+        } else if (12 <= realCoords && realCoords < 19) {
+            if (numberPlayer % 2) {
+                move =  750 - index_0 * 100
             } else {
-                if (7 <= coords && coords < 12) {
-                    move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
-                } else {
-                    move =  550 - index_0 * 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
+                move = realCoords !== 18 ? 700 - index_0 * 100 : 700 - index_0 * 100 - 100
             }
-        } else if (numberPlayer === 3) {
-            if (0 <= coords && coords < 7 || 12 <= coords && coords < 19) {
-                if (0 <= coords && coords < 7) {
-                    move = coords !== 6 ? index_0  * 100 + 250 : index_0  * 100 + 350
-                } else {
-                    move =  750 - index_0 * 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+            document.getElementById(`${numberPlayer}_Player`).style.left = move + 'px'
+        } else {
+            if (numberPlayer < 2) {
+                move = realCoords !== 23 ? 500 - index_0 * 100 : 500 - index_0 * 100 - 100
             } else {
-                if (7 <= coords && coords < 12) {
-                    move = coords !== 11 ? index_0 * 100 + 250 : index_0 * 100 + 350
-                } else {
-                    move =  550 - index_0 * 100
-                }
-                document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
+                move = 550 - index_0 * 100
             }
+            document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
         }
 
-        index_0 ++
         realCoords = realCoords === 23 ? 0 : realCoords + 1
-        if (square_cards.indexOf(realCoords) !== -1) {
-            index_0 = 0
-        }
+        index_0 = square_cards.indexOf(realCoords) === -1 ? index_0 + 1 : 0
     }
     return realCoords
 }
@@ -280,8 +234,6 @@ async function move(numberPlayer, numberSteps) {
     let skipping_move = checkSquareCards(numberPlayer)
     putCurrentPLayer(gameID, skipping_move, numberPlayer, playersCoords[numberPlayer])
     numberHistory += 1
-    // pastPlayer = currentPlayer
-    // await updatePlayer()
     currentPlayer = getCurrentPlayer(gameID)
     updateDocument(currentPlayer)
     await waiting_move()

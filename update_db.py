@@ -15,15 +15,23 @@ def add_game(session):
     game = Game(current_player=0)
     session.add(game)
     session.commit()
+    return game.id
+
+
+def add_null_history_move(session, game_id):
+    null_history_move = HistoryMove(game_id=game_id, number_history=0, number_move=-1, number_steps=0)
+    session.add(null_history_move)
+    session.commit()
+
 
 
 def add_players(session, game_id, count_players):
-    for i in range(4):
+    for i in range(count_players):
         player = Player()
         player.current_position = 0
         player.skipping_move = False
         player.number_move = i
-        player.game_id = 1
+        player.game_id = game_id
         session.add(player)
     session.commit()
 
