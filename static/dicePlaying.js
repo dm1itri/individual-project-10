@@ -11,18 +11,14 @@ const diceId = [
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 let currentPlayer
-console.log(parseInt(document.location.pathname.substring(6)))
 const gameID = parseInt(document.location.pathname.substring(6))
 let playersCoords = []
-let thisPlayer = getCookie('player_id')
+let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
 let numberHistory
 
 getCurrentPlayers(gameID)
 updateDocument(currentPlayer)
 
-function getCookie(name) {
-    return Number(document.cookie.slice(document.cookie.indexOf('=') + 1))
-}
 
 function getCurrentPlayer(gameID) {
     let xhr = new XMLHttpRequest()
@@ -113,7 +109,7 @@ function getCurrentPlayers(gameID) {
     for (let i = 0; i < games_args['count_players']; i++){
         playersCoords.push(games_args[`${i}_player`]['current_position'])
         document.getElementById(`${i}_Player`).style.display = 'block'
-        if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords)}
+        if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords[i])}
     }
 }
 
@@ -186,10 +182,10 @@ function rollDice (numberPlayer, index_0, number_steps) {
             }
             document.getElementById(`${numberPlayer}_Player`).style.top = move + 'px'
         }
-
         realCoords = realCoords === 23 ? 0 : realCoords + 1
         index_0 = square_cards.indexOf(realCoords) === -1 ? index_0 + 1 : 0
     }
+    console.log(realCoords)
     return realCoords
 }
 

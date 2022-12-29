@@ -27,6 +27,7 @@ class ApiPlayers(Resource):
         for i in range(len(players)):
             response[f'{i}_player'] = {'current_position': players[i].current_position,
                                        'skipping_move': players[i].skipping_move}
+        print(response)
         return jsonify(response)
 
 

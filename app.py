@@ -17,9 +17,8 @@ api.add_resource(ApiHistoryMove, '/api/history_game')  # /<int:number_history>
 
 @app.get('/game/<int:game_id>')
 def game(game_id):
-    print(request.cookies.get('player_id'))
-    if not request.cookies.get('player_id'):
-        # redirect(url_for('cookie_player_id'))
+    print(request.cookies.get('number_move'))
+    if not request.cookies.get('number_move') or request.cookies.get('game_id') != str(game_id):
         res = make_response("Обновите страницу для начала игры")
         with db_session.create_session() as session:
             player = session.query(Player).filter(Player.is_occupied == False, Player.game_id == game_id).order_by(Player.number_move).first()
@@ -27,10 +26,10 @@ def game(game_id):
                 return 'К сожалению, игровая комната заполнена'
             player.is_occupied = True
             session.commit()
-            res.set_cookie('player_id', str(player.number_move), max_age=60 * 60)  # , max_age= 60 * 60
+            res.set_cookie('number_move', str(player.number_move))  # , max_age= 60 * 60
+            res.set_cookie('game_id', str(game_id))
         return res
     else:
-        # print(request.cookies.get('player_id'))
         return render_template('index.html')
 
 
