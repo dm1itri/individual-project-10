@@ -1,11 +1,13 @@
 from requests import get, put
-
+from random import randint
 
 id_game = 1
 id_player = 1
+type_question = 'Биология'
 
+print(get(f'http://127.0.0.1:5000/api/question?type_question={type_question}').json())
 
-print(get(f'http://127.0.0.1:5000/api/history_game?game_id={id_game}&number_history=1').json())
+#print(get(f'http://127.0.0.1:5000/api/history_game?game_id={id_game}&number_history=1').json())
 
 #print(get(f'http://127.0.0.1:5000/api/players/{id_game}').json())  # получение всех пользователей
 

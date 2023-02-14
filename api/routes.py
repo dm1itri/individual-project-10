@@ -4,6 +4,8 @@ from data import db_session
 from data.player import Player
 from data.game import Game
 from data.history_move import HistoryMove
+from data.question import Question
+from random import randint
 
 
 def abort_if_user_not_found(id):
@@ -86,4 +88,13 @@ class ApiHistoryMove(Resource):
             history.number_steps = request.form['number_steps']
             session.add(history)
             session.commit()
+
+
+class ApiQuestion(Resource):
+    def get(self):
+        type_question = request.args.get('type_question')
+        types_questions_id = {'Биология': (1, 5), 'История': (6, 10), 'География': (11, 15)}
+        with db_session.create_session() as session:
+            question = session.query(Question).filter(Question.type_question == type_question, Question.id == randint(*types_questions_id[type_question])).first()
+        return jsonify(question.to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
 

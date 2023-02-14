@@ -8,11 +8,19 @@ const diceId = [
     'dicePlaying5',
     'dicePlaying6'
 ];
+const questionCards = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23]
+const questionBiologyCards = [2, 3, 10, 14, 17, 22]
+const questionHistoryCards = [1, 5, 11, 15, 18, 23]
+//const questionGeographyCards = [4, 6, 8, 13, 16, 20]
+//const questionBiologyCards = [3, 4, 11, 15, 18, 23]
+//const questionHistoryCards = [2, 6, 12, 16, 19, 24]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
+let answerCorrect = {}
 let currentPlayer
 const gameID = parseInt(document.location.pathname.substring(6))
 let playersCoords = []
+let playersPoints
 let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
 let numberHistory
 
@@ -87,6 +95,23 @@ function getHistoryMove(gameID, numberHistory) {
     return history[gameID]
 }
 
+function getQuestion(typeQuestion) {
+    let xhr = new XMLHttpRequest()
+    let question
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if  (xhr.status === 200) {
+                question = JSON.parse(xhr.response)
+            }
+            else {
+                console.log(xhr.status)
+            }
+        }
+    }
+    xhr.open('GET', `http://127.0.0.1:5000/api/question?type_question=${typeQuestion}`, false)
+    xhr.send()
+    return question
+}
 
 function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
@@ -223,18 +248,82 @@ function updateDocument(currentPlayer) {
     document.getElementById("buttonDicePlaying").style.visibility = currentPlayer === thisPlayer ? 'visible' : 'hidden'
 }
 
+function updateQuestion(question) {
+    document.getElementById("question_1").innerText = question['question']
+    for (let i=2; i < 5; i++) {
+        document.getElementById(`btn_answer_${i}`).value = question[`answer_${i}`]
+    }
+    answerCorrect[numberHistory] = randomIntFromInterval(1, 4)
+
+    if (answerCorrect[numberHistory] !== 1) {
+        document.getElementById(`btn_answer_1`).value = question[`answer_${answerCorrect[numberHistory]}`]
+    }
+    document.getElementById(`btn_answer_${answerCorrect[numberHistory]}`).value = question[`answer_correct`]
+    document.getElementById("question").style.visibility = 'visible'
+}
+
+function clickAnswer1() {
+    choosingAnswer(1, numberHistory)
+}
+function clickAnswer2() {
+    choosingAnswer(2,  numberHistory)
+}
+function clickAnswer3() {
+    choosingAnswer(3,  numberHistory)
+}
+function clickAnswer4() {
+    choosingAnswer(4,  numberHistory)
+}
+function greenAnswer() {
+    document.getElementById(`btn_answer_${answerCorrect[numberHistory]}`).style.background = 'rgba(0,255,0,0.71)'
+}
+function redAnswer(numberAnswer) {
+    document.getElementById(`btn_answer_${numberAnswer}`).style.background = 'rgba(255,0,0,0.89)'
+}
+async function choosingAnswer(numberChoosingAnswer, numberHistory) {
+    greenAnswer()
+    if (numberChoosingAnswer !== answerCorrect[numberHistory]) {
+        redAnswer(numberChoosingAnswer)
+    }
+    setTimeout(function () {
+        document.getElementById(`btn_answer_${answerCorrect[numberHistory]}`).style.background = 'buttonface'
+        document.getElementById(`btn_answer_${numberChoosingAnswer}`).style.backgroundColor = 'buttonface'
+        document.getElementById("question").style.visibility = 'hidden'
+    }, 3000)
+    await endMoveAndAnswer(currentPlayer, playersCoords[currentPlayer] === 7 ? 1 : 0, playersCoords[currentPlayer])
+
+}
 
 async function move(numberPlayer, numberSteps) {
+    let question
     putHistoryMove(gameID, numberPlayer, numberSteps)
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], numberSteps)
-    let skipping_move = checkSquareCards(numberPlayer)
-    putCurrentPLayer(gameID, skipping_move, numberPlayer, playersCoords[numberPlayer])
+    let skippingMove = checkSquareCards(numberPlayer)
+    console.log(playersCoords[numberPlayer])
+    if ((skippingMove === 0) && (playersCoords[numberPlayer] in questionCards) ) {
+        if (questionBiologyCards.indexOf(playersCoords[numberPlayer]) !== -1){
+            question = getQuestion('Биология')
+            console.log('Биология')
+        } else if (questionHistoryCards.indexOf(playersCoords[numberPlayer]) !== -1) {
+            question = getQuestion('История')
+            console.log('История')
+        } else {
+            question = getQuestion('География')
+        }
+        updateQuestion(question)
+    }
+    else {
+        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer])
+    }
+}
+
+async function endMoveAndAnswer(numberPlayer, skipMove, playerCoords) {
+    putCurrentPLayer(gameID,  skipMove, numberPlayer, playerCoords)
     numberHistory += 1
     currentPlayer = getCurrentPlayer(gameID)
     updateDocument(currentPlayer)
     await waiting_move()
 }
-
 
 async function waiting_move() {
     let numberMove
@@ -256,6 +345,5 @@ async function waiting_move() {
         }
     }
 }
-
 
 waiting_move()
