@@ -3,6 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from .game import Game
 
+
 class Player(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'player'
 
@@ -11,6 +12,8 @@ class Player(SqlAlchemyBase, SerializerMixin):
     skipping_move = Column(Boolean, default=False)
     number_move = Column(Integer)
     is_occupied = Column(Boolean, default=False)
+    number_of_points = Column(Integer, default=0)
+    thinks_about_the_question = Column(Boolean, default=False)
     game_id = Column(Integer, ForeignKey(Game.id))
 
     def __repr__(self):

@@ -14,6 +14,5 @@ class Question(SqlAlchemyBase, SerializerMixin):
     answer_3 = Column(String(32))
     answer_4 = Column(String(32))
 
-
     def __repr__(self):
-        return f'<Question {self.id}> Question: {self.question}\nAnswer_correct: {self.answer_correct}\nAnswer_2: {self.answer_2}\nAnswer_3: {self.answer_3}\nAnswer_4: {self.answer_4}\n'
+        return f'<QuestionID {self.id}> Question: {self.question} Type_question: {self.type_question}\nAnswer_correct: {self.answer_correct}\nAnswer_2: {self.answer_2}\nAnswer_3: {self.answer_3}\nAnswer_4: {self.answer_4}\n'

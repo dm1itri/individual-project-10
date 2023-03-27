@@ -16,8 +16,8 @@ def clear_table(session):
     session.commit()
 
 
-def add_game(session):
-    game = Game(current_player=0)
+def add_game(session, number_of_players):
+    game = Game(current_player=0, number_of_players=number_of_players)
     session.add(game)
     session.commit()
     return game.id
@@ -29,8 +29,8 @@ def add_null_history_move(session, game_id):
     session.commit()
 
 
-def add_players(session, game_id, count_players):
-    for i in range(count_players):
+def add_players(session, game_id, number_of_players):
+    for i in range(number_of_players):
         player = Player()
         player.current_position = 0
         player.skipping_move = False

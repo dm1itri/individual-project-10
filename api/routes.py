@@ -16,57 +16,61 @@ def abort_if_user_not_found(id):
 
 
 class ApiPlayers(Resource):
-    def get(self, game_id):
+    def get(self):
+        game_id = int(request.cookies.get('game_id'))
         with db_session.create_session() as session:
             game = session.query(Game).get(game_id)
             players = session.query(Player).filter(Player.game_id == game.id).order_by(Player.number_move).all()
             number_history = session.query(HistoryMove).filter(game_id == HistoryMove.game_id).order_by(HistoryMove.number_history.desc()).first().number_history
         response = {
             'current_player': game.current_player,
+            'question_id': game.question_id,
             'count_players': len(players),
             'number_history': number_history
         }
-        for i in range(len(players)):
+        for i in range(game.number_of_players):
             response[f'{i}_player'] = {'current_position': players[i].current_position,
-                                       'skipping_move': players[i].skipping_move}
-        print(response)
+                                       'skipping_move': players[i].skipping_move,
+                                       'thinks_about_the_question': players[i].thinks_about_the_question}
         return jsonify(response)
 
 
 class ApiGame(Resource):
-    def get(self, game_id):
+    def get(self):
+        game_id = int(request.cookies.get('game_id'))
         with db_session.create_session() as session:
             game = session.query(Game).get(game_id)
-            # player = session.query(Player).filter(Player.number_move == game.current_player).first()
-        return jsonify({game_id: game.to_dict(only=('current_player', ))})
+            current_player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == game.current_player).first()
+        return jsonify({**game.to_dict(only=('current_player', 'question_id')), **{'thinks_about_the_question': current_player.thinks_about_the_question}})
 
-    def put(self, game_id):
+    def put(self):
+        game_id = int(request.cookies.get('game_id'))
         with db_session.create_session() as session:
-            players = session.query(Player).filter(Player.game_id == game_id).all()
-            count_players = len(players)
-            for i in players:
-                if i.number_move == int(request.form['current_player']):
-                    player = i
+            player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == int(request.form['current_player'])).first()
+
             player.current_position = int(request.form['current_position'])
             player.skipping_move = int(request.form['skipping_move'])
+            player.number_of_points += int(request.form['number_of_points'])
+            player.thinks_about_the_question = True if request.form['thinks_about_the_question'] == 'true' else False
             session.commit()
-
-            curr_player = (int(request.form['current_player']) + 1) % count_players
-            for i in range(4):
-                player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == curr_player).first()
-                if player.skipping_move:
-                    player.skipping_move = False
-                    curr_player = (curr_player + 1) % count_players
-                else:
-                    break
-            game = session.query(Game).get(game_id)
-            game.current_player = curr_player
-            session.commit()
+            if not player.thinks_about_the_question:
+                game = session.query(Game).get(game_id)
+                curr_player = (int(request.form['current_player']) + 1) % game.number_of_players
+                for i in range(4):
+                    player = session.query(Player).filter(Player.game_id == game_id, Player.number_move == curr_player).first()
+                    if player.skipping_move:
+                        player.skipping_move = False
+                        curr_player = (curr_player + 1) % game.number_of_players
+                    else:
+                        break
+                game.current_player = curr_player
+                game.question_id = None
+                session.commit()
 
 
 class ApiHistoryMove(Resource):
     def get(self):
-        game_id = int(request.args.get('game_id'))
+        game_id = int(request.cookies.get('game_id'))
         number_history = request.args.get('number_history', None)
 
         with db_session.create_session() as session:
@@ -75,11 +79,11 @@ class ApiHistoryMove(Resource):
             else:
                 move = session.query(HistoryMove).filter(game_id == HistoryMove.game_id).order_by(HistoryMove.number_history.desc()).first()
         if not move:
-            return jsonify({game_id: None})
-        return jsonify({game_id: move.to_dict(only=('number_history', 'number_move', 'number_steps'))})
+            return jsonify(None)
+        return jsonify(move.to_dict(only=('number_history', 'number_move', 'number_steps')))
 
     def put(self):
-        game_id = int(request.args.get('game_id'))
+        game_id = int(request.cookies.get('game_id'))
         with db_session.create_session() as session:
             history = HistoryMove()
             history.game_id = game_id
@@ -92,9 +96,15 @@ class ApiHistoryMove(Resource):
 
 class ApiQuestion(Resource):
     def get(self):
+        if request.args.get('question_id') != 'null':
+            with db_session.create_session() as session:
+                return jsonify(session.query(Question).get(request.args.get('question_id')).to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
         type_question = request.args.get('type_question')
         types_questions_id = {'Биология': (1, 5), 'История': (6, 10), 'География': (11, 15)}
         with db_session.create_session() as session:
             question = session.query(Question).filter(Question.type_question == type_question, Question.id == randint(*types_questions_id[type_question])).first()
-        return jsonify(question.to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
+            game = session.query(Game).get(int(request.cookies.get('game_id')))
+            game.question_id = question.id
+            session.commit()
+            return jsonify(question.to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
 
