@@ -20,7 +20,7 @@ def add_game(session, number_of_players):
     game = Game(current_player=0, number_of_players=number_of_players)
     session.add(game)
     session.commit()
-    return game.id
+    return game
 
 
 def add_null_history_move(session, game_id):
@@ -29,13 +29,13 @@ def add_null_history_move(session, game_id):
     session.commit()
 
 
-def add_players(session, game_id, number_of_players):
+def add_players(session, game, number_of_players):
     for i in range(number_of_players):
         player = Player()
         player.current_position = 0
         player.skipping_move = False
         player.number_move = i
-        player.game_id = game_id
+        player.game = game
         session.add(player)
     session.commit()
 
@@ -85,17 +85,15 @@ def read_queastions_xlsx(filename):
             add_question(session, question)
 
 
+#read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
+'''''
 with db_session.create_session() as session:
     session.query(Question).delete()
     session.commit()
-
-read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
-'''''
-with db_session.create_session() as session:
     clear_table(session)
     add_game(session)
     add_players(session, 1, 2)
-'''''
+    '''''
 
 
 #with db_session.create_session() as session:

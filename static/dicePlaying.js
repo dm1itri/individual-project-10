@@ -1,3 +1,5 @@
+// Для отображения вопроса соперника при перезагрузке страницы заменить строку
+// games_args['question_id'] !== null && currentPlayer === thisPlayer на  games_args['question_id'] !== null
 const diceId = [
     'dicePlaying1',
     'dicePlaying2',
@@ -5,15 +7,13 @@ const diceId = [
     'dicePlaying4',
     'dicePlaying5',
     'dicePlaying6'
-];
+]
 const questionCards = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23]
 const questionBiologyCards = [2, 3, 10, 14, 17, 22]
 const questionHistoryCards = [1, 5, 11, 15, 18, 23]
-//const questionGeographyCards = [4, 6, 8, 13, 16, 20]
-//const questionBiologyCards = [3, 4, 11, 15, 18, 23]
-//const questionHistoryCards = [2, 6, 12, 16, 19, 24]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
+const baseURL = 'http://127.0.0.1:5000'
 let answerCorrect
 let currentPlayer
 // const gameID = parseInt(document.location.pathname.substring(6))
@@ -37,7 +37,7 @@ function getCurrentPlayer() {
             }
         }
     }
-    xhr.open('GET', `http://127.0.0.1:5000/api/game`, false)
+    xhr.open('GET', `${baseURL}/api/game`, false)
     xhr.send()
     return currPlayer
 }
@@ -54,7 +54,7 @@ function putCurrentPLayer(skipMove, currentPlayer, playerCoords, numberOfPoints,
             console.log(xhr.status)
         }
     }
-    xhr.open('PUT', `http://127.0.0.1:5000/api/game`, false)
+    xhr.open('PUT', `${baseURL}/api/game`, false)
     xhr.send(data)
 }
 function putHistoryMove(currentPlayer, numberSteps) {
@@ -67,7 +67,7 @@ function putHistoryMove(currentPlayer, numberSteps) {
                 console.log(xhr.status)
         }
     }
-    xhr.open('PUT', `http://127.0.0.1:5000/api/history_game`, false)
+    xhr.open('PUT', `${baseURL}/api/history_game`, false)
     xhr.send(data)
 }
 function getHistoryMove(numberHistory) {
@@ -80,7 +80,7 @@ function getHistoryMove(numberHistory) {
                 history = null
         }
     }
-    xhr.open('GET', `http://127.0.0.1:5000/api/history_game?number_history=${numberHistory}`, false)
+    xhr.open('GET', `${baseURL}/api/history_game?number_history=${numberHistory}`, false)
     xhr.send()
     return history
 }
@@ -97,7 +97,7 @@ function getQuestion(typeQuestion=null, questionId=null) {
             }
         }
     }
-    xhr.open('GET', `http://127.0.0.1:5000/api/question?type_question=${typeQuestion}&question_id=${questionId}`, false)
+    xhr.open('GET', `${baseURL}/api/question?type_question=${typeQuestion}&question_id=${questionId}`, false)
     xhr.send()
     return question
 }
@@ -111,7 +111,7 @@ function getCurrentPlayers() {
         }
     }
 
-    xhr.open('GET', `http://127.0.0.1:5000/api/players`, false)
+    xhr.open('GET', `${baseURL}/api/players`, false)
     xhr.send()
     currentPlayer = games_args['current_player']
     numberHistory = games_args['number_history']
@@ -120,7 +120,7 @@ function getCurrentPlayers() {
         document.getElementById(`${i}_Player`).style.display = 'block'
         if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords[i])}
     }
-    if (games_args['question_id'] !== null) {
+    if (games_args['question_id'] !== null && currentPlayer === thisPlayer) {
         answerCorrect = updateQuestion(getQuestion(null, games_args['question_id']))
     }
     return games_args[`${thisPlayer}_player`]['thinks_about_the_question']
@@ -251,7 +251,6 @@ function updateQuestion(question) {
 
 async function choosingAnswer(numberChoosingAnswer) {
     let point = 1
-    console.log(answerCorrect)
     document.getElementById(`btn_answer_${answerCorrect}`).style.background = 'rgba(0,255,0,0.71)'
     if (numberChoosingAnswer !== answerCorrect) {
         point = 0
@@ -271,7 +270,7 @@ async function move(numberPlayer, numberSteps) {
     numberHistory += 1
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], numberSteps)
     let skippingMove = checkSquareCards(numberPlayer)
-    if (skippingMove === 0 && playersCoords[numberPlayer] in questionCards ) {
+    if (skippingMove === 0 && questionCards.includes(playersCoords[numberPlayer])) {
         endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], 0, true)
         if (questionBiologyCards.includes(playersCoords[numberPlayer])){
             question = getQuestion('Биология')
@@ -283,7 +282,8 @@ async function move(numberPlayer, numberSteps) {
         answerCorrect = updateQuestion(question)
     }
     else {
-        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], 0, false)
+        let point = playersCoords[numberPlayer] === 21 ? 1: playersCoords[numberPlayer] === 9 ?-1:0
+        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], point, false)
     }
 }
 
@@ -301,7 +301,7 @@ async function waiting_move() {
     let t = true
     while (t) {
         result = getCurrentPlayer()
-        currentPlayer = result['current_player']
+        currentPlayer = result['game']['current_player']
         nextHistory = getHistoryMove(numberHistory + 1)
         updateDocument(currentPlayer, result['thinks_about_the_question'] && currentPlayer === thisPlayer)
         if (currentPlayer === thisPlayer && nextHistory === null) {
