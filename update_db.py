@@ -7,9 +7,6 @@ from data.question import Question
 import openpyxl
 
 
-db_session.global_init("db/games.sqlite")
-
-
 def clear_table(session):
     session.query(Game).delete()
     session.query(Player).delete()
@@ -84,7 +81,7 @@ def read_queastions_xlsx(filename):
         for question in all_questions:
             add_question(session, question)
 
-
+#db_session.global_init("db/games.sqlite")
 #read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
 '''''
 with db_session.create_session() as session:

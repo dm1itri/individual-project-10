@@ -5,7 +5,7 @@ from data.player import Player
 from data.game import Game
 from data.history_move import HistoryMove
 from data.question import Question
-from random import randint
+from random import randint, choice
 
 
 def abort_if_user_not_found(id):
@@ -50,6 +50,8 @@ class ApiGame(Resource):
             player.skipping_move = int(request.form['skipping_move'])
             player.number_of_points += int(request.form['number_of_points'])
             player.thinks_about_the_question = True if request.form['thinks_about_the_question'] == 'true' else False
+            if int(request.form['current_position']) not in (9, 21) and request.form['thinks_about_the_question'] == 'false':
+                player.number_of_correct_answers += int(request.form['number_of_points'])
             session.commit()
             if not player.thinks_about_the_question:
                 curr_player = (int(request.form['current_player']) + 1) % player.game.number_of_players
@@ -97,11 +99,28 @@ class ApiQuestion(Resource):
             with db_session.create_session() as session:
                 return jsonify(session.get(Question, request.args.get('question_id')).to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
         type_question = request.args.get('type_question')
+        if type_question == 'Случайный':
+            type_question = choice(['Биология', 'История', 'География'])
         types_questions_id = {'Биология': (1, 5), 'История': (6, 10), 'География': (11, 15)}
         with db_session.create_session() as session:
             question = session.query(Question).filter_by(type_question=type_question, id=randint(*types_questions_id[type_question])).first()
             game = session.get(Game, int(request.cookies.get('game_id')))
             game.question_id = question.id
+            player = session.query(Player).filter_by(game_id=game.id, number_move=game.current_player).first()
+            player.number_of_questions_received += 1
             session.commit()
             return jsonify(question.to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
 
+
+class ApiPlayersStatics(Resource):
+    def get(self):
+        players_statics = {}
+        game_id = int(request.cookies.get('game_id'))
+        with db_session.create_session() as session:
+            players = session.query(Player).filter_by(game_id=game_id).all()
+            for index, player in enumerate(players):
+                players_statics[index] = {'numbers_of_moves': len(session.query(HistoryMove).filter_by(game_id=game_id, number_move=index).all()),
+                                          'percent_of_correct_answers': f'{round(player.number_of_correct_answers / player.number_of_questions_received  * 100 if player.number_of_questions_received else 0)}%',
+                                          **player.to_dict(only=('number_of_points', 'number_of_questions_received', 'number_of_correct_answers'))}
+
+        return jsonify(players_statics)

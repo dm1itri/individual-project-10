@@ -4,7 +4,7 @@ from random import randint
 id_game = 1
 id_player = 1
 type_question = 'Биология'
-print(get(f'http://127.0.0.1:5000/api/game').json())
+print(get(f'http://127.0.0.1:5000/api/players_statics').json())
 #print(get(f'http://127.0.0.1:5000/api/question?type_question={type_question}').json())
 
 #print(get(f'http://127.0.0.1:5000/api/history_game?game_id={id_game}&number_history=1').json())

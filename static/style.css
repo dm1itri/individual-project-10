@@ -1,5 +1,14 @@
 body {
-  font-family: "Spectral", serif;
+  font-family: "Nunito Sans", sans-serif;
+}
+
+.playerStatistics {
+  line-height: 120%;
+  position: absolute;
+  width: 20%;
+}
+.playerStatistics .card-body {
+  height: 200px;
 }
 
 .filed {
@@ -19,6 +28,23 @@ body {
   height: 200px;
   width: 200px;
 }
+.filed .cards .busToPark img {
+  position: relative;
+  top: 10px;
+  height: 180px;
+  align-content: center;
+}
+.filed .cards .skipMove img {
+  height: 200px;
+}
+.filed .cards .teleportation img {
+  position: relative;
+  top: 10px;
+  height: 180px;
+}
+.filed .cards .start img {
+  height: 195px;
+}
 .filed .cards .rectangle-v {
   height: 200px;
   width: 100px;
@@ -26,6 +52,16 @@ body {
 .filed .cards .rectangle-h {
   height: 100px;
   width: 200px;
+}
+.filed .cards .rectangle-h img {
+  height: 90px;
+  align-content: center;
+}
+.filed .cards .random-question img {
+  position: relative;
+  top: 50px;
+  width: 95px;
+  align-content: center;
 }
 .filed .dicePlaying {
   position: absolute;
@@ -54,27 +90,34 @@ body {
   visibility: hidden;
 }
 .filed .question input {
+  white-space: normal;
+  line-height: 100%;
+  font-size: 16px;
   width: 100%;
   height: 100%;
 }
 .filed .question div {
   position: relative;
   width: 225px;
-  height: 50px;
-  font-size: 28px;
+  height: 75px;
+  font-size: 24px;
 }
 .filed .question input {
   border: 0;
+}
+.filed .question .question_1 {
+  width: 500px;
+  text-align: center;
 }
 .filed .question .answer_2 {
   top: 50px;
 }
 .filed .question .answer_3 {
-  top: -100px;
+  top: -150px;
   left: 275px;
 }
 .filed .question .answer_4 {
-  top: -50px;
+  top: -100px;
   left: 275px;
 }
 .filed .chips img {
@@ -108,6 +151,10 @@ body {
 
 .geography {
   background-color: turquoise;
+}
+
+.base {
+  background-color: white;
 }
 
 /*# sourceMappingURL=style.css.map */

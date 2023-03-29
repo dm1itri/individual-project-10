@@ -9,8 +9,9 @@ const diceId = [
     'dicePlaying6'
 ]
 const questionCards = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23]
-const questionBiologyCards = [2, 3, 10, 14, 17, 22]
-const questionHistoryCards = [1, 5, 11, 15, 18, 23]
+const questionBiologyCards = [2, 10, 14, 17, 22]
+const questionHistoryCards = [1, 5, 11, 18, 23]
+const questionGeographyCards = [4, 6, 8, 13, 16, 20]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 const baseURL = 'http://127.0.0.1:5000'
@@ -23,7 +24,33 @@ let thinksAboutTheQuestion
 let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
 let numberHistory
 
+function getPlayersStatics() {
+    let xhr = new XMLHttpRequest()
+    let playersStatics
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                playersStatics = JSON.parse(xhr.response)
+            }
+            else {
+                console.log(xhr.status)
+            }
+        }
+    }
+    xhr.open('GET', `${baseURL}/api/players_statics`, false)
+    xhr.send()
+    console.log(playersStatics)
+    for (let i=0; i < Object.keys(playersStatics).length; i++) {
+        document.getElementById(`${i}Player`).style.display = 'block'
+        document.getElementById(`${i}numberOfMoves`).innerText = playersStatics[i]['numbers_of_moves']
+        document.getElementById(`${i}numberOfPoints`).innerText = playersStatics[i]['number_of_points']
+        document.getElementById(`${i}numberOfQuestionsReceived`).innerText = playersStatics[i]['number_of_questions_received']
+        document.getElementById(`${i}numberOfCorrectAnswers`).innerText = playersStatics[i]['number_of_correct_answers']
+        document.getElementById(`${i}percentOfCorrectAnswers`).innerText = playersStatics[i]['percent_of_correct_answers']
 
+    }
+    return playersStatics
+}
 function getCurrentPlayer() {
     let xhr = new XMLHttpRequest()
     let currPlayer
@@ -276,8 +303,10 @@ async function move(numberPlayer, numberSteps) {
             question = getQuestion('Биология')
         } else if (questionHistoryCards.includes(playersCoords[numberPlayer])) {
             question = getQuestion('История')
-        } else {
+        } else if (questionGeographyCards.includes(playersCoords[numberPlayer])){
             question = getQuestion('География')
+        } else {
+            question = getQuestion('Случайный') // !!!!!! Но здесь должны быть какие-то особенне вопросы
         }
         answerCorrect = updateQuestion(question)
     }
@@ -300,6 +329,7 @@ async function waiting_move() {
     let numberMove, result, nextHistory
     let t = true
     while (t) {
+        getPlayersStatics()
         result = getCurrentPlayer()
         currentPlayer = result['game']['current_player']
         nextHistory = getHistoryMove(numberHistory + 1)
@@ -316,7 +346,7 @@ async function waiting_move() {
         }
     }
 }
-
+getPlayersStatics()
 thinksAboutTheQuestion = getCurrentPlayers()
 updateDocument(currentPlayer, thinksAboutTheQuestion)
 waiting_move()

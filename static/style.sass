@@ -1,15 +1,24 @@
 $color-history: yellow
 $color-biology: green
 $color-geography: turquoise
+$color-base: white
 
 body
-    font-family: 'Spectral', serif
+    font-family: 'Nunito Sans', sans-serif
+
+.playerStatistics
+    line-height: 120%
+    position: absolute
+    width: 20%
+    .card-body
+        height: 200px
 
 
 .filed
     width: 60%
     margin: auto
     position: relative
+
     .cards
         text-transform: uppercase
 
@@ -19,9 +28,25 @@ body
             border: 1px solid black
 
         .square
-
             height: 200px
             width: 200px
+
+        .busToPark img
+            position: relative
+            top: 10px
+            height: 180px
+            align-content: center
+
+        .skipMove img
+            height: 200px
+
+        .teleportation img
+            position: relative
+            top: 10px
+            height: 180px
+
+        .start img
+            height: 195px
 
         .rectangle-v
             height: 200px
@@ -30,6 +55,16 @@ body
         .rectangle-h
             height: 100px
             width: 200px
+            img
+                height: 90px
+                align-content: center
+
+        .random-question img
+            position: relative
+            top: 50px
+            width: 95px
+            align-content: center
+
 
     .dicePlaying
         position: absolute
@@ -57,25 +92,32 @@ body
         left: 250px
         visibility: hidden
         input
+            white-space: normal
+            line-height: 100%
+            font-size: 16px
             width: 100%
             height: 100%
         div
             position: relative
             width: 225px
-            height: 50px
-            font-size: 28px
+            height: 75px
+            font-size: 24px
         input
             border: 0
+
+        .question_1
+            width: 500px
+            text-align: center
 
         .answer_2
             top: 50px
 
         .answer_3
-            top: -100px
+            top: -150px
             left: 275px
 
         .answer_4
-            top: -50px
+            top: -100px
             left: 275px
 
 
@@ -106,6 +148,8 @@ body
 
 .geography
     background-color: $color-geography
+.base
+    background-color: $color-base
 
 
 

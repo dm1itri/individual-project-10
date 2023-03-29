@@ -15,6 +15,8 @@ class Player(SqlAlchemyBase, SerializerMixin):
     is_occupied = Column(Boolean, default=False)
     number_of_points = Column(Integer, default=0)
     thinks_about_the_question = Column(Boolean, default=False)
+    number_of_questions_received = Column(Integer, default=0)
+    number_of_correct_answers = Column(Integer, default=0)
     game_id = Column(Integer, ForeignKey(Game.id))
     game = relationship('Game', backref='player')
 

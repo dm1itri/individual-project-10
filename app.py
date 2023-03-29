@@ -3,7 +3,7 @@ from flask_restful import Api
 from data import db_session
 from data.player import Player
 from update_db import clear_game_players, add_game, add_players, add_null_history_move
-from api.routes import ApiGame, ApiPlayers, ApiHistoryMove, ApiQuestion
+from api.routes import ApiGame, ApiPlayers, ApiHistoryMove, ApiQuestion, ApiPlayersStatics
 
 app = Flask(__name__)
 db_session.global_init("db/games.sqlite")
@@ -13,6 +13,7 @@ api.add_resource(ApiGame, '/api/game')
 api.add_resource(ApiPlayers, '/api/players')
 api.add_resource(ApiHistoryMove, '/api/history_game')  # /<int:number_history>
 api.add_resource(ApiQuestion, '/api/question')
+api.add_resource(ApiPlayersStatics, '/api/players_statics')
 
 
 @app.get('/game/<int:game_id>')
