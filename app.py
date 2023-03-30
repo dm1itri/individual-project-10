@@ -39,7 +39,7 @@ def create_game():
     if request.method == 'GET':
         return render_template('create_game.html')
     with db_session.create_session() as session:
-        game = add_game(session, int(request.form.get('number_of_players')))
+        game = add_game(session, int(request.form.get('number_of_players')), int(request.form.get('max_number_of_questions')))
         add_players(session, game, int(request.form.get('number_of_players')))
         add_null_history_move(session, game.id)
         return redirect(url_for('game', game_id=game.id))

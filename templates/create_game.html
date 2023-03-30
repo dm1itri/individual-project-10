@@ -2,16 +2,29 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-        <link rel="icon" href="/static/image/icon.png">
+    <link rel="icon" href="/static/image/icon.png">
     <title>Создание игры</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/create_game.css">
 </head>
-<body>
-    <form method="post">
-          <fieldset>
-                <legend>Параметры игры</legend>
-                <label for="number_of_players">Количество игроков (2-4)</label><input type="number" min="2" max="4" value="2" id="number_of_players" name="number_of_players">
-          </fieldset>
-    <input type="submit" value="Создать игру">
-    </form>
-</body>
+    <body class="w-100">
+
+        <form method="post">
+            <img class="mb-4" src="/static/image/icon.png" alt="">
+            <h1 class="h3 mb-3 fw-normal">Настройка игры</h1>
+
+            <div class="form-floating">
+                <input class="form-control" type="number" min="2" max="4" value="2" id="number_of_players" name="number_of_players">
+                <label for="number_of_players">Количество игроков (2-4)</label>
+            </div>
+            <div class="form-floating">
+                <input class="form-control" type="number" min="10" max="100" value="10" step="10" id="max_number_of_questions" name="max_number_of_questions">
+                <label for="max_number_of_questions">Количество вопросов (10-100)</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Начать игру</button>
+            <p class="mt-5 mb-3 text-muted">Гимназия №271</p>
+        </form>
+
+    </body>
 </html>

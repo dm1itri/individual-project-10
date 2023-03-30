@@ -39,13 +39,11 @@ function getPlayersStatics() {
     }
     xhr.open('GET', `${baseURL}/api/players_statics`, false)
     xhr.send()
-    console.log(playersStatics)
     for (let i=0; i < Object.keys(playersStatics).length; i++) {
         document.getElementById(`${i}Player`).style.display = 'block'
         document.getElementById(`${i}numberOfMoves`).innerText = playersStatics[i]['numbers_of_moves']
         document.getElementById(`${i}numberOfPoints`).innerText = playersStatics[i]['number_of_points']
         document.getElementById(`${i}numberOfQuestionsReceived`).innerText = playersStatics[i]['number_of_questions_received']
-        document.getElementById(`${i}numberOfCorrectAnswers`).innerText = playersStatics[i]['number_of_correct_answers']
         document.getElementById(`${i}percentOfCorrectAnswers`).innerText = playersStatics[i]['percent_of_correct_answers']
 
     }
@@ -288,7 +286,7 @@ async function choosingAnswer(numberChoosingAnswer) {
         document.getElementById(`btn_answer_${numberChoosingAnswer}`).style.background = 'buttonface'
         document.getElementById("question").style.visibility = 'hidden'
     }, 3000)
-    await endMoveAndAnswer(currentPlayer, playersCoords[currentPlayer] === 7 ? 1 : 0, playersCoords[currentPlayer], point, false)
+    await endMoveAndAnswer(currentPlayer, playersCoords[currentPlayer] === 7 ? 1 : 0, playersCoords[currentPlayer], point, 0)
 }
 
 async function move(numberPlayer, numberSteps) {
@@ -298,7 +296,7 @@ async function move(numberPlayer, numberSteps) {
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], numberSteps)
     let skippingMove = checkSquareCards(numberPlayer)
     if (skippingMove === 0 && questionCards.includes(playersCoords[numberPlayer])) {
-        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], 0, true)
+        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], 0, 1)
         if (questionBiologyCards.includes(playersCoords[numberPlayer])){
             question = getQuestion('Биология')
         } else if (questionHistoryCards.includes(playersCoords[numberPlayer])) {
@@ -312,7 +310,7 @@ async function move(numberPlayer, numberSteps) {
     }
     else {
         let point = playersCoords[numberPlayer] === 21 ? 1: playersCoords[numberPlayer] === 9 ?-1:0
-        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], point, false)
+        endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], point, 0)
     }
 }
 

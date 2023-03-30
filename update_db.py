@@ -13,8 +13,8 @@ def clear_table(session):
     session.commit()
 
 
-def add_game(session, number_of_players):
-    game = Game(current_player=0, number_of_players=number_of_players)
+def add_game(session, number_of_players, max_number_of_questions):
+    game = Game(current_player=0, number_of_players=number_of_players, max_number_of_questions=max_number_of_questions)
     session.add(game)
     session.commit()
     return game
@@ -81,8 +81,8 @@ def read_queastions_xlsx(filename):
         for question in all_questions:
             add_question(session, question)
 
-#db_session.global_init("db/games.sqlite")
-#read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
+db_session.global_init("db/games.sqlite")
+read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
 '''''
 with db_session.create_session() as session:
     session.query(Question).delete()
