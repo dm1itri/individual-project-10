@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/static/index.css">
 </head>
 <body>
-    <div class="playerStatistics">
+    <nav class="playerStatistics">
         <div id="0Player" class="card-body text-white bg-warning">
                 <h4>Первый игрок</h4>
                 <p>Количество перемещений <i id="0numberOfMoves"></i><br>
@@ -40,9 +40,9 @@
                     Получено вопросов <i id="3numberOfQuestionsReceived"></i><br>
                     Верных ответов <i id="3percentOfCorrectAnswers"></i><br>
         </div>
-    </div>
+    </nav>
 
-    <div class="filed">
+    <main class="filed">
         <div class="cards">
             <div id="cell0" class="square start"><img src="/static/image/start.png" alt="старт">старт</div>
             <div id="cell1" class="rectangle-v history" style="left:200px">и</div>
@@ -101,7 +101,8 @@
             <img id="2_Player" class="thirdPlayer" src="/static/image/car_3.png" alt="thirdPlayer">
             <img id="3_Player" class="fourthPlayer" src="/static/image/car_4.png" alt="fourthPlayer">
         </div>
-    </div>
+        <img id="endGame" class="endGame" src="/static/image/game-over-2.png" alt="Конец игры">
+    </main>
 
     <script src="/static/dicePlaying.js"></script>
 </body>

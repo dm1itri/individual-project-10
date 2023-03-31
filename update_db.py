@@ -10,6 +10,8 @@ import openpyxl
 def clear_table(session):
     session.query(Game).delete()
     session.query(Player).delete()
+    session.query(HistoryMove).delete()
+    session.query(Question).delete()
     session.commit()
 
 
@@ -28,17 +30,13 @@ def add_null_history_move(session, game_id):
 
 def add_players(session, game, number_of_players):
     for i in range(number_of_players):
-        player = Player()
-        player.current_position = 0
-        player.skipping_move = False
-        player.number_move = i
-        player.game = game
+        player = Player(current_position=0, skipping_move=False, number_move=i, game=game)
         session.add(player)
     session.commit()
 
 
 def clear_game_players(session, game_id):
-    game = session.query(Game).get(game_id)
+    game = session.get(Game, game_id)
     game.current_player = 0
     players = session.query(Player).filter(Player.game_id == game.id).all()
     for player in players:
@@ -46,8 +44,7 @@ def clear_game_players(session, game_id):
         player.skipping_move = False
         player.is_occupied = False
     session.query(HistoryMove).filter(HistoryMove.game_id == game_id).delete()
-    history = HistoryMove()
-    history.game_id = game_id
+    history = HistoryMove(game_id=game_id)
     session.add(history)
     session.commit()
 
@@ -66,8 +63,6 @@ def add_question(session, question_d):
 
 def read_queastions_xlsx(filename):
     wb = openpyxl.load_workbook(filename)
-    # Define variable to read the active sheet:
-    # Iterate the loop to read the cell values
     keys_d = ['question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4']
     all_questions = []
     for name in ['Биология', 'История', 'География']:
@@ -80,20 +75,3 @@ def read_queastions_xlsx(filename):
     with db_session.create_session() as session:
         for question in all_questions:
             add_question(session, question)
-
-db_session.global_init("db/games.sqlite")
-read_queastions_xlsx('C:\\Users\\dimma\\Desktop\\SHCOOL\\Исследовательская\\10 класс\\Вопросы.xlsx')
-'''''
-with db_session.create_session() as session:
-    session.query(Question).delete()
-    session.commit()
-    clear_table(session)
-    add_game(session)
-    add_players(session, 1, 2)
-    '''''
-
-
-#with db_session.create_session() as session:
-#    n = session.query(HistoryMove).filter(1 == HistoryMove.game_id).order_by(HistoryMove.number_history.desc()).all()
-
-#print(n)

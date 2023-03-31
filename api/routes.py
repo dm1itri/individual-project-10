@@ -134,9 +134,8 @@ class ApiQuestion(MyResource):
         type_question = self.type_question
         if type_question == 'Случайный':
             type_question = choice(['Биология', 'История', 'География'])
-        types_questions_id = {'Биология': (1, 5), 'История': (6, 10), 'География': (11, 15)}
         with db_session.create_session() as session:
-            question = session.query(Question).filter_by(type_question=type_question, id=randint(*types_questions_id[type_question])).first()
+            question = choice(session.query(Question).filter_by(type_question=type_question).all())
             game = session.get(Game, self.game_id)
             game.question_id = question.id
             player = session.query(Player).filter_by(game_id=game.id, number_move=game.current_player).first()

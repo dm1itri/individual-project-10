@@ -78,6 +78,7 @@ body {
   left: 220px;
   width: 560px;
   text-align: center;
+  display: none;
 }
 .filed .rollDice span {
   text-transform: uppercase;
@@ -119,6 +120,14 @@ body {
 .filed .question .answer_4 {
   top: -100px;
   left: 275px;
+}
+.filed .endGame {
+  position: absolute;
+  top: 200px;
+  left: 200px;
+  margin-top: 23px;
+  margin-left: 44px;
+  display: none;
 }
 .filed .chips img {
   width: 50px;

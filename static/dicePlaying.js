@@ -1,13 +1,6 @@
 // Для отображения вопроса соперника при перезагрузке страницы заменить строку
 // games_args['question_id'] !== null && currentPlayer === thisPlayer на  games_args['question_id'] !== null
-const diceId = [
-    'dicePlaying1',
-    'dicePlaying2',
-    'dicePlaying3',
-    'dicePlaying4',
-    'dicePlaying5',
-    'dicePlaying6'
-]
+const diceId = ['dicePlaying1', 'dicePlaying2', 'dicePlaying3', 'dicePlaying4', 'dicePlaying5', 'dicePlaying6']
 const questionCards = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23]
 const questionBiologyCards = [2, 10, 14, 17, 22]
 const questionHistoryCards = [1, 5, 11, 18, 23]
@@ -15,39 +8,22 @@ const questionGeographyCards = [4, 6, 8, 13, 16, 20]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
 const baseURL = 'http://127.0.0.1:5000'
-let answerCorrect
-let currentPlayer
-// const gameID = parseInt(document.location.pathname.substring(6))
+let answerCorrect, currentPlayer, numberHistory
 let playersCoords = []
-// let playersPoints
-let thinksAboutTheQuestion
 let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
-let numberHistory
 
 function getPlayersStatics() {
-    let xhr = new XMLHttpRequest()
-    let playersStatics
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                playersStatics = JSON.parse(xhr.response)
+    fetch(`${baseURL}/api/players_statics`)
+        .then(response => response.json())
+        .then(playersStatics => {
+            for (let i=0; i < Object.keys(playersStatics).length; i++) {
+                document.getElementById(`${i}Player`).style.display = 'block'
+                document.getElementById(`${i}numberOfMoves`).innerText = playersStatics[i]['numbers_of_moves']
+                document.getElementById(`${i}numberOfPoints`).innerText = playersStatics[i]['number_of_points']
+                document.getElementById(`${i}numberOfQuestionsReceived`).innerText = playersStatics[i]['number_of_questions_received']
+                document.getElementById(`${i}percentOfCorrectAnswers`).innerText = playersStatics[i]['percent_of_correct_answers']
             }
-            else {
-                console.log(xhr.status)
-            }
-        }
-    }
-    xhr.open('GET', `${baseURL}/api/players_statics`, false)
-    xhr.send()
-    for (let i=0; i < Object.keys(playersStatics).length; i++) {
-        document.getElementById(`${i}Player`).style.display = 'block'
-        document.getElementById(`${i}numberOfMoves`).innerText = playersStatics[i]['numbers_of_moves']
-        document.getElementById(`${i}numberOfPoints`).innerText = playersStatics[i]['number_of_points']
-        document.getElementById(`${i}numberOfQuestionsReceived`).innerText = playersStatics[i]['number_of_questions_received']
-        document.getElementById(`${i}percentOfCorrectAnswers`).innerText = playersStatics[i]['percent_of_correct_answers']
-
-    }
-    return playersStatics
+        })
 }
 function getCurrentPlayer() {
     let xhr = new XMLHttpRequest()
@@ -153,13 +129,11 @@ function getCurrentPlayers() {
 
 const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min) // min and max included
 
-
-async function dicePlaying() {
+function dicePlaying() {
     document.getElementById('buttonDicePlaying').style.visibility = 'hidden'
     let delay = 100
     let numberSteps = randomIntFromInterval(0, 5)
-    let pastIndex
-    let interval
+    let pastIndex, interval
     document.getElementById(diceId[numberSteps]).style.display = 'block'
     interval = setInterval(function() {
         pastIndex = numberSteps
@@ -225,7 +199,6 @@ function rollDice (numberPlayer, index_0, number_steps) {
     return realCoords
 }
 
-
 function checkSquareCards(numberPlayer) {
     if (playersCoords[numberPlayer] === 12) {
         let countSteps = randomIntFromInterval(1, 23)
@@ -247,13 +220,14 @@ function checkSquareCards(numberPlayer) {
     return 0
 }
 
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-function updateDocument(currentPlayer, thinksAboutTheQuestion=false) {
+function updateDocument(currentPlayer, thinksAboutTheQuestion=false, gameIsOver) {
+    document.getElementById("endGame").style.display = gameIsOver ? 'block':'none'
+    document.getElementById("question").style.display = gameIsOver ? 'none':'block'
+    document.getElementById("rollDice").style.display = gameIsOver ? 'none':'block'
     document.getElementById("numberPlayer").innerText = rusNamePlayers[currentPlayer]
     document.getElementById("numberPlayer").style.color = enNamePlayers[currentPlayer]
     document.getElementById("buttonDicePlaying").style.visibility = (currentPlayer === thisPlayer && !thinksAboutTheQuestion) ? 'visible' : 'hidden'
@@ -272,7 +246,6 @@ function updateQuestion(question) {
     document.getElementById("question").style.visibility = 'visible'
     return answerCorrect
 }
-
 
 async function choosingAnswer(numberChoosingAnswer) {
     let point = 1
@@ -329,22 +302,27 @@ async function waiting_move() {
     while (t) {
         getPlayersStatics()
         result = getCurrentPlayer()
-        currentPlayer = result['game']['current_player']
-        nextHistory = getHistoryMove(numberHistory + 1)
-        updateDocument(currentPlayer, result['thinks_about_the_question'] && currentPlayer === thisPlayer)
-        if (currentPlayer === thisPlayer && nextHistory === null) {
-            t = false
-        } else if (nextHistory === null) {
-            await sleep(2000)
+        if (result['game']['is_over'] === false) {
+            currentPlayer = result['game']['current_player']
+            nextHistory = getHistoryMove(numberHistory + 1)
+            updateDocument(currentPlayer, result['thinks_about_the_question'] && currentPlayer === thisPlayer, false)
+            if (currentPlayer === thisPlayer && nextHistory === null) {
+                t = false
+            } else if (nextHistory === null) {
+                await sleep(2000)
+            } else {
+                numberMove = nextHistory['number_move']
+                playersCoords[numberMove] = rollDice(numberMove, playersCoords[numberMove], nextHistory['number_steps'])
+                numberHistory += 1
+                await sleep (2000)
+            }
         } else {
-            numberMove = nextHistory['number_move']
-            playersCoords[numberMove] = rollDice(numberMove, playersCoords[numberMove], nextHistory['number_steps'])
-            numberHistory += 1
-            await sleep (2000)
+            setTimeout(updateDocument, 1000, currentPlayer, false, true)
+            t = false
         }
     }
 }
-getPlayersStatics()
-thinksAboutTheQuestion = getCurrentPlayers()
-updateDocument(currentPlayer, thinksAboutTheQuestion)
+
+
+getCurrentPlayers()
 waiting_move()
