@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, make_response, redirect, url_
 from flask_restful import Api
 from data import db_session
 from data.player import Player
-from update_db import add_game, add_players, add_null_history_move
+from data.update_db import add_game, add_players, add_null_history_move
 from api.routes import ApiGame, ApiPlayers, ApiHistoryMove, ApiQuestion, ApiPlayersStatics
 from data.question import Question
 

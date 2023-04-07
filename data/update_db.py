@@ -4,7 +4,7 @@ from data.player import Player
 from data.history_move import HistoryMove
 from data.question import Question
 
-import openpyxl
+from openpyxl import load_workbook
 
 
 def clear_table(session):
@@ -62,7 +62,7 @@ def add_question(session, question_d):
 
 
 def read_queastions_xlsx(filename):
-    wb = openpyxl.load_workbook(filename)
+    wb = load_workbook(filename)
     keys_d = ['question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4']
     all_questions = []
     for name in ['Биология', 'История', 'География']:
