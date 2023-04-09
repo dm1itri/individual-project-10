@@ -7,7 +7,7 @@ const questionHistoryCards = [1, 5, 11, 18, 23]
 const questionGeographyCards = [4, 6, 8, 13, 16, 20]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
-const baseURL = 'http://127.0.0.1:5000'
+const baseURL = 'http://localhost:8001' //'http://127.0.0.1:5000'   //
 let answerCorrect, currentPlayer, numberHistory
 let playersCoords = []
 let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
@@ -309,7 +309,7 @@ async function waiting_move() {
             if (currentPlayer === thisPlayer && nextHistory === null) {
                 t = false
             } else if (nextHistory === null) {
-                await sleep(2000)
+                await sleep(1000)
             } else {
                 numberMove = nextHistory['number_move']
                 playersCoords[numberMove] = rollDice(numberMove, playersCoords[numberMove], nextHistory['number_steps'])

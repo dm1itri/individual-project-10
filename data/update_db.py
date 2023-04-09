@@ -64,10 +64,11 @@ def add_question(session, question_d):
 def read_queastions_xlsx(filename):
     wb = load_workbook(filename)
     keys_d = ['question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4']
+    d_count_question = {'Биология': 46, 'История': 25, 'География': 22}
     all_questions = []
-    for name in ['Биология', 'История', 'География']:
+    for name in d_count_question.keys():
         sheet = wb[name]
-        for i in range(1, 6):
+        for i in range(1, d_count_question[name]):
             d = {'type_question': name}
             for j in range(1, 6):
                 d[keys_d[j - 1]] = sheet.cell(row=i, column=j).value

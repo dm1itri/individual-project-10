@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+ web:
+  build:
+   context: .
+  ports:
+  - 8001:8001
+  volumes:
+  - ./:/app
+
+
+volumes:
+  sqlite:

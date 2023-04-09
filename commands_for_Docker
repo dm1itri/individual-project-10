@@ -1,0 +1,4 @@
+###docker build --tag individual-project-10 .
+###docker run -d -p 8001:8001 individual-project-10
+
+docker compose -f docker-compose.dev.yml up --build
