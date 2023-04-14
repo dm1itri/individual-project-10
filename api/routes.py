@@ -44,6 +44,8 @@ class ApiPlayers(MyResource):
                 response[f'{i}_player'] = {'current_position': players[i].current_position,
                                            'skipping_move': players[i].skipping_move,
                                            'thinks_about_the_question': players[i].thinks_about_the_question}
+            if response['question_id']:
+                response['question'] = session.get(Question, response['question_id']).to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4'))
         return jsonify(response)
 
 
@@ -125,17 +127,13 @@ class ApiQuestion(MyResource):
         self.reqparse.add_argument('question_id', location="args")
         self.reqparse.add_argument('type_question', type=str, location="args")
         self.args = self.reqparse.parse_args()
-        self.question_id, self.type_question = self.args['question_id'], self.args['type_question']
+        self.type_question = self.args['type_question']
 
     def get(self):
-        if self.question_id != 'null':
-            with db_session.create_session() as session:
-                return jsonify(session.get(Question, self.question_id).to_dict(only=('question', 'answer_correct', 'answer_2', 'answer_3', 'answer_4')))
-        type_question = self.type_question
-        if type_question == 'Случайный':
-            type_question = choice(['Биология', 'История', 'География'])
+        if self.type_question == 'Случайный':
+            self.type_question = choice(['Биология', 'История', 'География'])
         with db_session.create_session() as session:
-            question = choice(session.query(Question).filter_by(type_question=type_question).all())
+            question = choice(session.query(Question).filter_by(type_question=self.type_question).all())
             game = session.get(Game, self.game_id)
             game.question_id = question.id
             player = session.query(Player).filter_by(game_id=game.id, number_move=game.current_player).first()

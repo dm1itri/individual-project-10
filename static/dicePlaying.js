@@ -4,10 +4,9 @@ const diceId = ['dicePlaying1', 'dicePlaying2', 'dicePlaying3', 'dicePlaying4', 
 const questionCards = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23]
 const questionBiologyCards = [2, 10, 14, 17, 22]
 const questionHistoryCards = [1, 5, 11, 18, 23]
-const questionGeographyCards = [4, 6, 8, 13, 16, 20]
 const rusNamePlayers = ['желтый', 'зеленый', 'красный', 'синий']
 const enNamePlayers = ['yellow', 'green', 'red', 'blue']
-const baseURL = 'http://localhost:8001' //'http://127.0.0.1:5000'   //
+const baseURL = 'http://127.0.0.1:5000' //'http://localhost:8001'   //
 let answerCorrect, currentPlayer, numberHistory
 let playersCoords = []
 let thisPlayer = Number(document.cookie.match(/number_move=(.+?)(;|$)/)[1])
@@ -85,46 +84,28 @@ function getHistoryMove(numberHistory) {
     xhr.send()
     return history
 }
-function getQuestion(typeQuestion=null, questionId=null) {
-    let xhr = new XMLHttpRequest()
-    let question
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if  (xhr.status === 200) {
-                question = JSON.parse(xhr.response)
-            }
-            else {
-                console.log(xhr.status)
-            }
-        }
-    }
-    xhr.open('GET', `${baseURL}/api/question?type_question=${typeQuestion}&question_id=${questionId}`, false)
-    xhr.send()
-    return question
+
+function getQuestion(typeQuestion) {
+    fetch(`${baseURL}/api/question?type_question=${typeQuestion}`)
+        .then(response => response.json())
+        .then(question => updateQuestion(question))
+
 }
 function getCurrentPlayers() {
-    let games_args
-    let xhr = new XMLHttpRequest()
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            games_args = JSON.parse(xhr.response)
+    fetch(`${baseURL}/api/players`)
+    .then(response => response.json())
+    .then(games_args => {
+        currentPlayer = games_args['current_player']
+        numberHistory = games_args['number_history']
+        for (let i = 0; i < games_args['count_players']; i++){
+            playersCoords.push(games_args[`${i}_player`]['current_position'])
+            document.getElementById(`${i}_Player`).style.display = 'block'
+            if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords[i])}
         }
-    }
-
-    xhr.open('GET', `${baseURL}/api/players`, false)
-    xhr.send()
-    currentPlayer = games_args['current_player']
-    numberHistory = games_args['number_history']
-    for (let i = 0; i < games_args['count_players']; i++){
-        playersCoords.push(games_args[`${i}_player`]['current_position'])
-        document.getElementById(`${i}_Player`).style.display = 'block'
-        if (playersCoords[i] !== 0) {rollDice(i, 0, playersCoords[i])}
-    }
-    if (games_args['question_id'] !== null && currentPlayer === thisPlayer) {
-        answerCorrect = updateQuestion(getQuestion(null, games_args['question_id']))
-    }
-    return games_args[`${thisPlayer}_player`]['thinks_about_the_question']
+        if (games_args['question_id'] !== null && currentPlayer === thisPlayer) {
+            updateQuestion(games_args['question'])
+        }
+    }).then(waiting_move)
 }
 
 const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min) // min and max included
@@ -234,7 +215,7 @@ function updateDocument(currentPlayer, thinksAboutTheQuestion=false, gameIsOver)
 }
 
 function updateQuestion(question) {
-    const answerCorrect = randomIntFromInterval(1, 4)
+    answerCorrect = randomIntFromInterval(1, 4)
     document.getElementById("question_1").innerText = question['question']
     for (let i=2; i < 5; i++) {
         document.getElementById(`btn_answer_${i}`).value = question[`answer_${i}`]
@@ -244,7 +225,6 @@ function updateQuestion(question) {
     }
     document.getElementById(`btn_answer_${answerCorrect}`).value = question[`answer_correct`]
     document.getElementById("question").style.visibility = 'visible'
-    return answerCorrect
 }
 
 async function choosingAnswer(numberChoosingAnswer) {
@@ -263,7 +243,7 @@ async function choosingAnswer(numberChoosingAnswer) {
 }
 
 async function move(numberPlayer, numberSteps) {
-    let question
+    let typeQuestion
     putHistoryMove(numberPlayer, numberSteps)
     numberHistory += 1
     playersCoords[numberPlayer] = rollDice(numberPlayer, playersCoords[numberPlayer], numberSteps)
@@ -271,15 +251,15 @@ async function move(numberPlayer, numberSteps) {
     if (skippingMove === 0 && questionCards.includes(playersCoords[numberPlayer])) {
         endMoveAndAnswer(numberPlayer, skippingMove, playersCoords[numberPlayer], 0, 1)
         if (questionBiologyCards.includes(playersCoords[numberPlayer])){
-            question = getQuestion('Биология')
+            typeQuestion = 'Биология'
         } else if (questionHistoryCards.includes(playersCoords[numberPlayer])) {
-            question = getQuestion('История')
-        } else if (questionGeographyCards.includes(playersCoords[numberPlayer])){
-            question = getQuestion('География')
+            typeQuestion = 'История'
+        } else if (playersCoords[numberPlayer] === 3 || playersCoords[numberPlayer] === 15){
+            typeQuestion = 'Случайный'
         } else {
-            question = getQuestion('Случайный') // !!!!!! Но здесь должны быть какие-то особенне вопросы
+            typeQuestion = 'География' // !!!!!! Но здесь должны быть какие-то особенне вопросы
         }
-        answerCorrect = updateQuestion(question)
+        getQuestion(typeQuestion)
     }
     else {
         let point = playersCoords[numberPlayer] === 21 ? 1: playersCoords[numberPlayer] === 9 ?-1:0
@@ -304,12 +284,12 @@ async function waiting_move() {
         result = getCurrentPlayer()
         if (result['game']['is_over'] === false) {
             currentPlayer = result['game']['current_player']
-            nextHistory = getHistoryMove(numberHistory + 1)
             updateDocument(currentPlayer, result['thinks_about_the_question'] && currentPlayer === thisPlayer, false)
+            nextHistory = getHistoryMove(numberHistory + 1)
             if (currentPlayer === thisPlayer && nextHistory === null) {
                 t = false
             } else if (nextHistory === null) {
-                await sleep(1000)
+                await sleep(2000)
             } else {
                 numberMove = nextHistory['number_move']
                 playersCoords[numberMove] = rollDice(numberMove, playersCoords[numberMove], nextHistory['number_steps'])
@@ -325,4 +305,3 @@ async function waiting_move() {
 
 
 getCurrentPlayers()
-waiting_move()

@@ -1,10 +1,17 @@
 from requests import get, put
 from random import randint
+import time
+#starting time
+start = time.time()
 
-id_game = 1
-id_player = 1
+
 type_question = 'Биология'
-print(get(f'http://127.0.0.1:5000/api/players_statics').json())
+cookies = {'game_id': '11'}
+print(get(f'http://ca71693.tw1.ru/api/players', cookies=cookies).json())
+end = time.time()
+
+# total time taken
+print("Execution time of the program is- ", end-start)
 #print(get(f'http://127.0.0.1:5000/api/question?type_question={type_question}').json())
 
 #print(get(f'http://127.0.0.1:5000/api/history_game?game_id={id_game}&number_history=1').json())
